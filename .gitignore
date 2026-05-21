@@ -2,3 +2,4 @@ prisma/dev.db
 .next/
 node_modules/
 .env
+tsconfig.tsbuildinfo

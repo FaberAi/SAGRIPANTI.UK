@@ -43,7 +43,8 @@ async function yahooChart(symbol: string, interval: string, range: string) {
       result: Array<{
         meta: {
           regularMarketPrice: number;
-          previousClose: number;
+          previousClose?: number;
+          chartPreviousClose?: number;
           longName?: string;
           shortName?: string;
           regularMarketVolume: number;
@@ -69,7 +70,14 @@ export async function getQuote(symbol: string): Promise<Quote> {
 
   const meta = result.meta;
   const price = meta.regularMarketPrice;
-  const prev = meta.previousClose;
+
+  // `previousClose` non è sempre presente nel meta del range 5d: ricadiamo su
+  // `chartPreviousClose` e, in ultima istanza, sull'ultima chiusura valida
+  // della serie storica, così change/changePercent non risultano mai null.
+  const closes = result.indicators.quote[0]?.close ?? [];
+  const lastValidClose = [...closes].reverse().find((c) => typeof c === "number" && c > 0);
+  const prev =
+    meta.previousClose ?? meta.chartPreviousClose ?? lastValidClose ?? price;
   const change = price - prev;
   return {
     symbol: upper,

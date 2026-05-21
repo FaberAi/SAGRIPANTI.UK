@@ -1,6 +1,16 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 
+interface BotRun {
+  id: number;
+  action: string;
+  reason: string;
+  message: string;
+  price: number | null;
+  quantity: number | null;
+  createdAt: string;
+}
+
 interface Bot {
   id: number;
   name: string;
@@ -8,7 +18,10 @@ interface Bot {
   strategy: string;
   params: string;
   active: boolean;
+  lastRunAt: string | null;
+  lastSignal: string | null;
   createdAt: string;
+  runs: BotRun[];
 }
 
 const STRATEGIES = [
@@ -23,6 +36,22 @@ const DEFAULT_PARAMS: Record<string, Record<string, number>> = {
   MACD_SIGNAL: { fast: 12, slow: 26, signal: 9, quantity: 1 },
 };
 
+function timeAgo(iso: string | null): string {
+  if (!iso) return "mai eseguito";
+  const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (s < 60) return `${s}s fa`;
+  if (s < 3600) return `${Math.floor(s / 60)}m fa`;
+  if (s < 86400) return `${Math.floor(s / 3600)}h fa`;
+  return `${Math.floor(s / 86400)}g fa`;
+}
+
+function actionColor(action: string): string {
+  if (action === "BUY") return "#1ed760";
+  if (action === "SELL") return "#ff4466";
+  if (action === "ERROR") return "#ff4466";
+  return "#64748b";
+}
+
 export default function BotsPage() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -33,7 +62,7 @@ export default function BotsPage() {
     params: DEFAULT_PARAMS["MA_CROSSOVER"],
   });
   const [running, setRunning] = useState<number | null>(null);
-  const [results, setResults] = useState<Record<number, string>>({});
+  const [expanded, setExpanded] = useState<number | null>(null);
 
   const fetchBots = useCallback(async () => {
     const res = await fetch("/api/bot");
@@ -61,6 +90,8 @@ export default function BotsPage() {
       body: JSON.stringify({ id, active }),
     });
     await fetchBots();
+    // All'attivazione il bot esegue subito una volta: ricarico per mostrarne l'esito.
+    if (active) setTimeout(fetchBots, 2500);
   };
 
   const deleteBot = async (id: number) => {
@@ -71,14 +102,13 @@ export default function BotsPage() {
 
   const runNow = async (id: number) => {
     setRunning(id);
-    const res = await fetch("/api/bot", {
+    await fetch("/api/bot", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    const data = await res.json();
-    setResults((prev) => ({ ...prev, [id]: data.result }));
     setRunning(null);
+    setExpanded(id);
     await fetchBots();
   };
 
@@ -92,6 +122,17 @@ export default function BotsPage() {
         <button className="btn-primary" onClick={() => setShowForm(!showForm)}>
           {showForm ? "✕ ANNULLA" : "+ NUOVO BOT"}
         </button>
+      </div>
+
+      {/* Banner automazione */}
+      <div className="card" style={{ padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
+        <span style={{ fontSize: 16 }}>⏱️</span>
+        <div style={{ fontSize: 12, color: "#94a3b8" }}>
+          I bot <strong style={{ color: "#1ed760" }}>attivi</strong> vengono eseguiti automaticamente
+          <strong style={{ color: "#e2e8f0" }}> ogni giorno alle 22:00</strong>, dopo la chiusura dei mercati.
+          Usa <strong style={{ color: "#00d4ff" }}>RUN</strong> per un&apos;esecuzione immediata.
+          Ogni esecuzione resta nello storico.
+        </div>
       </div>
 
       {/* New bot form */}
@@ -179,16 +220,26 @@ export default function BotsPage() {
                 <th>STRATEGIA</th>
                 <th>PARAMETRI</th>
                 <th>STATO</th>
-                <th>ULTIMO RISULTATO</th>
+                <th>ULTIMO RUN</th>
+                <th>ESITO</th>
                 <th>AZIONI</th>
               </tr>
             </thead>
             <tbody>
               {bots.map((bot) => {
                 const params = JSON.parse(bot.params) as Record<string, number>;
-                return (
+                const lastRun = bot.runs[0];
+                const isOpen = expanded === bot.id;
+                return [
                   <tr key={bot.id}>
-                    <td style={{ fontWeight: 600 }}>{bot.name}</td>
+                    <td>
+                      <button onClick={() => setExpanded(isOpen ? null : bot.id)}
+                        style={{ background: "none", border: "none", color: "#e2e8f0", fontWeight: 600,
+                          cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 5 }}>
+                        <span style={{ color: "#64748b", fontSize: 10 }}>{isOpen ? "▼" : "▶"}</span>
+                        {bot.name}
+                      </button>
+                    </td>
                     <td style={{ color: "#00d4ff", fontWeight: 700 }}>{bot.symbol}</td>
                     <td>
                       <span className="badge badge-blue">
@@ -203,8 +254,14 @@ export default function BotsPage() {
                         {bot.active ? "● ATTIVO" : "○ INATTIVO"}
                       </span>
                     </td>
-                    <td style={{ color: "#64748b", fontSize: 11, maxWidth: 200 }}>
-                      {results[bot.id] ?? "—"}
+                    <td style={{ color: "#64748b", fontSize: 11 }}>{timeAgo(bot.lastRunAt)}</td>
+                    <td style={{ fontSize: 11, maxWidth: 220 }}>
+                      {lastRun ? (
+                        <span style={{ color: actionColor(lastRun.action) }}>
+                          <strong>{lastRun.action}</strong>
+                          <span style={{ color: "#64748b" }}> · {lastRun.message}</span>
+                        </span>
+                      ) : <span style={{ color: "#64748b" }}>—</span>}
                     </td>
                     <td>
                       <div style={{ display: "flex", gap: 6 }}>
@@ -222,8 +279,30 @@ export default function BotsPage() {
                         </button>
                       </div>
                     </td>
-                  </tr>
-                );
+                  </tr>,
+                  isOpen && (
+                    <tr key={`${bot.id}-history`}>
+                      <td colSpan={8} style={{ background: "#0b1220", padding: "10px 16px" }}>
+                        <div className="label" style={{ marginBottom: 8 }}>STORICO ESECUZIONI</div>
+                        {bot.runs.length === 0 ? (
+                          <div style={{ color: "#64748b", fontSize: 11 }}>Nessuna esecuzione ancora.</div>
+                        ) : (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                            {bot.runs.map((r) => (
+                              <div key={r.id} style={{ display: "flex", gap: 10, fontSize: 11, alignItems: "baseline" }}>
+                                <span style={{ color: "#475569", minWidth: 110 }}>
+                                  {new Date(r.createdAt).toLocaleString("it-IT", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                                </span>
+                                <span style={{ color: actionColor(r.action), fontWeight: 700, minWidth: 46 }}>{r.action}</span>
+                                <span style={{ color: "#94a3b8" }}>{r.message}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ),
+                ];
               })}
             </tbody>
           </table>

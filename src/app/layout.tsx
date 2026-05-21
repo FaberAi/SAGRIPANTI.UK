@@ -1,20 +1,29 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import NavBar from "@/components/NavBar";
+import RegisterSW from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
-  title: "SAGRIPANTI.UK — Trading Terminal",
-  description: "Terminale di trading professionale — Gruppo Sagripanti",
+  title: "Gruppo Sagripanti",
+  description:
+    "Gruppo Sagripanti — tecnologia, editoria, ospitalità e servizi. La casa di FaberAi, Love Me, delle testate e di PolizzaDoc.",
+  applicationName: "Gruppo Sagripanti",
+  appleWebApp: {
+    capable: true,
+    title: "Sagripanti",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#070b12",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="it">
       <body>
-        <NavBar />
-        <main style={{ padding: "16px", maxWidth: "1800px", margin: "0 auto" }}>
-          {children}
-        </main>
+        {children}
+        <RegisterSW />
       </body>
     </html>
   );

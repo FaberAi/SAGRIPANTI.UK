@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const links = [
-  { href: "/", label: "DASHBOARD" },
+  { href: "/terminal", label: "DASHBOARD" },
   { href: "/chart/AAPL", label: "GRAFICO" },
   { href: "/portfolio", label: "PORTAFOGLIO" },
   { href: "/bots", label: "BOT" },
@@ -12,6 +12,14 @@ const links = [
 
 export default function NavBar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const logout = async () => {
+    await fetch("/api/auth", { method: "DELETE" });
+    router.push("/");
+    router.refresh();
+  };
+
   return (
     <nav style={{
       background: "#0d1524",
@@ -22,21 +30,20 @@ export default function NavBar() {
       gap: 0,
       height: 44,
     }}>
-      <span style={{
+      <Link href="/" style={{
         color: "#00d4ff",
         fontWeight: 700,
         fontSize: 14,
         letterSpacing: "0.1em",
         marginRight: 32,
         whiteSpace: "nowrap",
+        textDecoration: "none",
       }}>
         ▶ SAGRIPANTI.UK
-      </span>
+      </Link>
       {links.map((l) => {
         const segment = l.href.split("/")[1];
-        const active = l.href === "/"
-          ? pathname === "/"
-          : pathname.startsWith(`/${segment}`);
+        const active = pathname === l.href || pathname.startsWith(`/${segment}`);
         return (
           <Link
             key={l.href}
@@ -58,8 +65,25 @@ export default function NavBar() {
           </Link>
         );
       })}
-      <div style={{ marginLeft: "auto", color: "#374151", fontSize: 11 }}>
-        <LiveClock />
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>
+        <span style={{ color: "#374151", fontSize: 11 }}><LiveClock /></span>
+        <button
+          onClick={logout}
+          style={{
+            background: "transparent",
+            border: "1px solid #1e2d40",
+            color: "#64748b",
+            fontSize: 10,
+            letterSpacing: "0.08em",
+            fontWeight: 600,
+            padding: "4px 10px",
+            borderRadius: 2,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          ESCI
+        </button>
       </div>
     </nav>
   );

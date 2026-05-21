@@ -43,12 +43,29 @@ model Trade {
 }
 
 model BotConfig {
-  id        Int      @id @default(autoincrement())
-  name      String
-  symbol    String
-  strategy  String   // "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL"
-  params    String   // JSON string
-  active    Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int       @id @default(autoincrement())
+  name       String
+  symbol     String
+  strategy   String    // "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL"
+  params     String    // JSON string
+  active     Boolean   @default(false)
+  lastRunAt  DateTime?
+  lastSignal String?   // ultimo segnale agito: BUY | SELL | HOLD
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  runs       BotRun[]
+}
+
+model BotRun {
+  id        Int       @id @default(autoincrement())
+  botId     Int
+  bot       BotConfig @relation(fields: [botId], references: [id], onDelete: Cascade)
+  action    String    // BUY | SELL | HOLD | SKIP | ERROR
+  reason    String    // perché la strategia ha prodotto quel segnale
+  message   String    // esito leggibile dell'esecuzione
+  price     Float?
+  quantity  Float?
+  createdAt DateTime  @default(now())
+
+  @@index([botId, createdAt])
 }

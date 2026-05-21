@@ -32,7 +32,10 @@ export default function MarketTable() {
     try {
       const res = await fetch("/api/market?action=watchlist");
       const data = await res.json();
-      setQuotes(data);
+      // l'API può rispondere con {error} in caso di problema: ignora i non-array
+      if (Array.isArray(data)) setQuotes(data);
+    } catch {
+      /* errore di rete transitorio: si riprova al prossimo intervallo */
     } finally {
       setLoading(false);
     }

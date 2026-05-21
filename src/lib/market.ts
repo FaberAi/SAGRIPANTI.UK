@@ -31,10 +31,27 @@ function isCrypto(symbol: string) {
   return CRYPTO_SYMBOLS.has(symbol.toUpperCase());
 }
 
+// fetch con ritentativi: Yahoo/CoinGecko ogni tanto fanno rate-limit (429)
+// o danno errori 5xx transitori. Si ritenta con backoff prima di arrendersi.
+async function fetchRetry(url: string, init?: RequestInit, tries = 3): Promise<Response> {
+  let lastErr: unknown = new Error("fetch fallito");
+  for (let i = 0; i < tries; i++) {
+    try {
+      const res = await fetch(url, init);
+      if (res.ok || (res.status !== 429 && res.status < 500)) return res;
+      lastErr = new Error(`HTTP ${res.status}`);
+    } catch (e) {
+      lastErr = e;
+    }
+    if (i < tries - 1) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+  }
+  throw lastErr instanceof Error ? lastErr : new Error("fetch fallito");
+}
+
 // Yahoo Finance chart API – no auth needed
 async function yahooChart(symbol: string, interval: string, range: string) {
   const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}&range=${range}`;
-  const res = await fetch(url, {
+  const res = await fetchRetry(url, {
     headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json" },
   });
   if (!res.ok) throw new Error(`Yahoo API error ${res.status} for ${symbol}`);
@@ -93,7 +110,7 @@ export async function getQuote(symbol: string): Promise<Quote> {
 
 async function getCryptoQuote(symbol: string): Promise<Quote> {
   const id = CRYPTO_IDS[symbol];
-  const res = await fetch(
+  const res = await fetchRetry(
     `https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd&include_24hr_change=true&include_market_cap=true&include_24hr_vol=true`
   );
   const data = await res.json() as Record<string, { usd: number; usd_24h_change: number; usd_market_cap: number; usd_24h_vol: number }>;
@@ -143,7 +160,7 @@ async function getCryptoHistory(symbol: string, range: string): Promise<OHLCV[]>
   const id = CRYPTO_IDS[symbol];
   const daysMap: Record<string, number> = { "1mo": 30, "3mo": 90, "6mo": 180, "1y": 365, "5y": 1825 };
   const days = daysMap[range] ?? 90;
-  const res = await fetch(
+  const res = await fetchRetry(
     `https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=usd&days=${days}`
   );
   const data = await res.json() as number[][];

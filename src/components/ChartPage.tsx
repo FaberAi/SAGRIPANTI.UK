@@ -47,17 +47,24 @@ export default function ChartPage({ paramsPromise }: { paramsPromise: Promise<{ 
   useEffect(() => {
     fetch(`/api/market?symbol=${symbol}`)
       .then((r) => r.json())
-      .then(setQuote);
+      .then((q) => {
+        if (q && typeof q.price === "number") setQuote(q);
+      })
+      .catch(() => {
+        /* dato non disponibile: la quotazione resta vuota */
+      });
   }, [symbol]);
 
   useEffect(() => {
     setLoading(true);
     fetch(`/api/market?action=history&symbol=${symbol}&interval=${range.interval}&range=${range.value}`)
       .then((r) => r.json())
-      .then((d: OHLCV[]) => {
-        setData(d);
+      .then((d) => {
+        // l'API può rispondere con {error}: si accettano solo array validi
+        setData(Array.isArray(d) ? (d as OHLCV[]) : []);
         setLoading(false);
-      });
+      })
+      .catch(() => setLoading(false));
   }, [symbol, range]);
 
   // Build main chart

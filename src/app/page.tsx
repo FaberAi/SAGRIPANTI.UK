@@ -428,15 +428,9 @@ export default function LandingPage() {
           }}
         >
           <Reveal>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "minmax(240px, 360px) 1fr",
-                gap: 48,
-                alignItems: "center",
-              }}
-            >
+            <div className="founder-grid">
               <div
+                className="founder-photo"
                 style={{
                   position: "relative",
                   aspectRatio: "4 / 5",

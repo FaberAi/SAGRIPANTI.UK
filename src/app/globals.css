@@ -208,3 +208,23 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   transition: border-color 0.2s;
 }
 .saguk-link:hover { border-color: var(--accent); }
+
+/* Sezione fondatore: due colonne su desktop, impilate su mobile
+   (così il testo non resta schiacciato accanto alla foto). */
+.founder-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 360px) 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (max-width: 780px) {
+  .founder-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+  .founder-photo {
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

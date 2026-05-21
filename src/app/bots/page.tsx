@@ -129,8 +129,9 @@ export default function BotsPage() {
         <span style={{ fontSize: 16 }}>⏱️</span>
         <div style={{ fontSize: 12, color: "#94a3b8" }}>
           I bot <strong style={{ color: "#1ed760" }}>attivi</strong> vengono eseguiti automaticamente
-          <strong style={{ color: "#e2e8f0" }}> ogni ora</strong>. Usa <strong style={{ color: "#00d4ff" }}>RUN</strong> per
-          un&apos;esecuzione immediata. Ogni esecuzione resta nello storico.
+          <strong style={{ color: "#e2e8f0" }}> ogni giorno alle 22:00</strong>, dopo la chiusura dei mercati.
+          Usa <strong style={{ color: "#00d4ff" }}>RUN</strong> per un&apos;esecuzione immediata.
+          Ogni esecuzione resta nello storico.
         </div>
       </div>
 

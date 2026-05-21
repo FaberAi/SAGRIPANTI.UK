@@ -35,7 +35,7 @@ export async function PATCH(req: NextRequest) {
   const { id, active } = await req.json() as { id: number; active: boolean };
   const bot = await prisma.botConfig.update({ where: { id }, data: { active } });
 
-  // All'attivazione esegue subito una volta; poi ci pensa il cron orario.
+  // All'attivazione esegue subito una volta; poi ci pensa il cron giornaliero.
   if (active) runBot(id).catch(console.error);
 
   return NextResponse.json(bot);

@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Portfolio {
+  id        Int        @id @default(autoincrement())
+  cash      Float      @default(100000)
+  createdAt DateTime   @default(now())
+  positions Position[]
+  trades    Trade[]
+}
+
+model Position {
+  id          Int       @id @default(autoincrement())
+  symbol      String
+  quantity    Float
+  avgPrice    Float
+  portfolioId Int
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+
+  @@unique([portfolioId, symbol])
+}
+
+model Trade {
+  id          Int       @id @default(autoincrement())
+  symbol      String
+  type        String    // "BUY" | "SELL"
+  quantity    Float
+  price       Float
+  fee         Float
+  total       Float
+  source      String    @default("manual") // "manual" | "bot"
+  botName     String?
+  createdAt   DateTime  @default(now())
+  portfolioId Int
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+}
+
+model BotConfig {
+  id        Int      @id @default(autoincrement())
+  name      String
+  symbol    String
+  strategy  String   // "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL"
+  params    String   // JSON string
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

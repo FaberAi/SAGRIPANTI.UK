@@ -129,7 +129,7 @@ export default function LandingPage() {
             backdropFilter: "blur(4px)",
           }}
         >
-          <span style={{ fontWeight: 700, letterSpacing: "0.22em", fontSize: 13 }}>
+          <span className="wordmark" style={{ letterSpacing: "0.14em", fontSize: 13 }}>
             SAGRIPANTI
           </span>
           <Link
@@ -174,13 +174,13 @@ export default function LandingPage() {
             G R U P P O &nbsp;·&nbsp; EST. 2026
           </div>
           <h1
-            className="metal-text"
+            className="metal-text wordmark"
             style={{
-              fontSize: "clamp(52px, 13vw, 170px)",
-              fontWeight: 900,
-              letterSpacing: "0.02em",
-              lineHeight: 0.95,
+              fontSize: "clamp(32px, 8vw, 122px)",
+              letterSpacing: "0.01em",
+              lineHeight: 1,
               margin: 0,
+              maxWidth: "100%",
               animation: "saguk-rise 1.1s cubic-bezier(0.2,0.7,0.2,1) 0.35s both",
             }}
           >
@@ -344,8 +344,8 @@ export default function LandingPage() {
                     }}
                   >
                     <span
-                      className="metal-text"
-                      style={{ fontSize: 30, fontWeight: 900 }}
+                      className="metal-text wordmark"
+                      style={{ fontSize: 30 }}
                     >
                       {d.n}
                     </span>
@@ -638,8 +638,8 @@ export default function LandingPage() {
         >
           <div>
             <div
-              className="metal-text"
-              style={{ fontWeight: 900, fontSize: 18, letterSpacing: "0.08em" }}
+              className="metal-text wordmark"
+              style={{ fontSize: 14, letterSpacing: "0.06em" }}
             >
               GRUPPO SAGRIPANTI
             </div>

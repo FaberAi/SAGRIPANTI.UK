@@ -65,8 +65,8 @@ export default function LoginPage() {
         }}
       >
         <div
-          className="metal-text"
-          style={{ fontSize: 26, fontWeight: 900, letterSpacing: "0.06em" }}
+          className="metal-text wordmark"
+          style={{ fontSize: 21, letterSpacing: "0.02em" }}
         >
           SAGRIPANTI.UK
         </div>

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import BacktestModal, { type BacktestConfig } from "@/components/BacktestModal";
 
 interface BotRun {
   id: number;
@@ -74,6 +75,7 @@ export default function BotsPage() {
   });
   const [running, setRunning] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [backtestTarget, setBacktestTarget] = useState<BacktestConfig | null>(null);
 
   const fetchBots = useCallback(async () => {
     try {
@@ -206,9 +208,29 @@ export default function BotsPage() {
             </div>
           </div>
 
-          <button className="btn-green" style={{ marginTop: 16 }} onClick={createBot}>
-            CREA BOT
-          </button>
+          <div style={{ display: "flex", gap: 10, marginTop: 16, alignItems: "center" }}>
+            <button className="btn-green" onClick={createBot}>
+              CREA BOT
+            </button>
+            <button
+              className="btn-ghost"
+              style={{ color: "#00d4ff", borderColor: "#00d4ff" }}
+              disabled={!form.symbol}
+              onClick={() =>
+                setBacktestTarget({
+                  label: form.name || "Nuova strategia",
+                  symbol: form.symbol,
+                  strategy: form.strategy,
+                  params: form.params,
+                })
+              }
+            >
+              📈 PROVA SU UN ANNO DI STORICO
+            </button>
+            <span style={{ color: "#64748b", fontSize: 11 }}>
+              Verifica la strategia prima di crearla — nessun ordine reale.
+            </span>
+          </div>
         </div>
       )}
 
@@ -291,6 +313,13 @@ export default function BotsPage() {
                           onClick={() => runNow(bot.id)} disabled={running === bot.id}>
                           {running === bot.id ? "..." : "RUN"}
                         </button>
+                        <button className="btn-ghost" style={{ padding: "3px 8px" }}
+                          title="Simula la strategia su un anno di storico"
+                          onClick={() => setBacktestTarget({
+                            label: bot.name, symbol: bot.symbol, strategy: bot.strategy, params,
+                          })}>
+                          BACKTEST
+                        </button>
                         <button className="btn-ghost" style={{ padding: "3px 8px", color: "#ff4466", borderColor: "#ff4466" }}
                           onClick={() => deleteBot(bot.id)}>
                           ✕
@@ -326,6 +355,8 @@ export default function BotsPage() {
           </table>
         )}
       </div>
+
+      <BacktestModal config={backtestTarget} onClose={() => setBacktestTarget(null)} />
     </div>
   );
 }

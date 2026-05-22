@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * Splash d'ingresso: pioggia di codice verde (Matrix) che si coagula e
- * forma la scritta SAGRIPANTI in acciaio (font Orbitron, spigoloso). Tutto
- * su canvas, ~5,5s, poi sfuma e rivela la landing. Una volta per sessione.
+ * Splash d'ingresso: pioggia di codice nero (Matrix invertito) che si coagula
+ * su sfondo bianco sporco e forma la scritta SAGRIPANTI in acciaio brunito
+ * (font Orbitron, spigoloso). Tutto su canvas, ~5,5s, poi sfuma e rivela la
+ * landing chiara. Una volta per sessione.
  */
 
 interface Particle {
@@ -13,6 +14,8 @@ interface Particle {
   char: string;
   delay: number;
 }
+
+const BG = "#f4f1ea"; // bianco sporco — coerente con la vetrina
 
 const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネ0123456789ﾊﾋﾌﾍﾎ<>=/{}*+#$".split("");
 const pick = () => CHARS[(Math.random() * CHARS.length) | 0];
@@ -86,7 +89,7 @@ export default function IntroSplash() {
           fs -= 4;
           octx.font = fontOf(fs);
         }
-        octx.fillStyle = "#fff";
+        octx.fillStyle = "#fff"; // solo per campionare l'alpha della maschera
         octx.textAlign = "center";
         octx.textBaseline = "middle";
         octx.fillText(word, cx, cy);
@@ -114,29 +117,29 @@ export default function IntroSplash() {
         ctx.font = fontOf(fs);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
+        // acciaio brunito: legge su bianco sporco, alternanza chiaro/scuro
         const g = ctx.createLinearGradient(0, cy - fs / 2, 0, cy + fs / 2);
-        g.addColorStop(0.0, "#3d4348");
-        g.addColorStop(0.2, "#c8d0d6");
-        g.addColorStop(0.38, "#ffffff");
-        g.addColorStop(0.5, "#79828a");
-        g.addColorStop(0.63, "#eef2f5");
-        g.addColorStop(0.83, "#9aa2a8");
-        g.addColorStop(1.0, "#2b2f34");
-        ctx.shadowColor = "rgba(0,0,0,0.55)";
+        g.addColorStop(0.0, "#6b7178");
+        g.addColorStop(0.22, "#2a2d31");
+        g.addColorStop(0.42, "#585d63");
+        g.addColorStop(0.56, "#16181b");
+        g.addColorStop(0.72, "#4a4e54");
+        g.addColorStop(1.0, "#1f2225");
+        ctx.shadowColor = "rgba(35,30,20,0.32)";
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 5;
         ctx.fillStyle = g;
         ctx.fillText(word, cx, cy);
         ctx.shadowColor = "transparent";
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "rgba(255,255,255,0.22)";
+        ctx.strokeStyle = "rgba(0,0,0,0.18)";
         ctx.strokeText(word, cx, cy);
         if (shine > 0 && shine < 1) {
           ctx.globalCompositeOperation = "source-atop";
           const bx = -W * 0.4 + shine * W * 1.8;
           const sg = ctx.createLinearGradient(bx, 0, bx + W * 0.34, 0);
           sg.addColorStop(0, "rgba(255,255,255,0)");
-          sg.addColorStop(0.5, "rgba(255,255,255,0.9)");
+          sg.addColorStop(0.5, "rgba(255,255,255,0.85)");
           sg.addColorStop(1, "rgba(255,255,255,0)");
           ctx.fillStyle = sg;
           ctx.fillRect(0, cy - fs, W, fs * 2);
@@ -151,22 +154,25 @@ export default function IntroSplash() {
         const t = now - startedAt;
 
         if (t < steelStart) {
-          ctx.fillStyle = "rgba(5,8,6,0.16)";
+          // trail fade: velo di bianco sporco semi-trasparente
+          ctx.fillStyle = "rgba(244,241,234,0.18)";
           ctx.fillRect(0, 0, W, H);
           const rainA = t < T_RAIN ? 1 : Math.max(0, 1 - (t - T_RAIN) / T_FORM);
           ctx.font = "16px 'JetBrains Mono',monospace";
           for (let i = 0; i < cols; i++) {
             const x = i * cell;
             const y = drops[i];
-            ctx.fillStyle = `rgba(190,255,210,${0.9 * rainA})`;
+            // testa della goccia: quasi-nero netto
+            ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
             ctx.fillText(pick(), x, y);
-            ctx.fillStyle = `rgba(0,225,110,${0.55 * rainA})`;
+            // scia: grigio medio che sfuma
+            ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
             ctx.fillText(pick(), x, y - cell);
             ctx.fillText(pick(), x, y - cell * 2);
             drops[i] = y > H + Math.random() * 240 ? Math.random() * -120 : y + cell;
           }
         } else {
-          ctx.fillStyle = "#050806";
+          ctx.fillStyle = BG;
           ctx.fillRect(0, 0, W, H);
         }
 
@@ -188,7 +194,8 @@ export default function IntroSplash() {
             if (flip && local < 1) p.char = pick();
             const set = local >= 1;
             const a = (set ? 1 : 0.45 + 0.55 * local) * (1 - steelA);
-            ctx.fillStyle = set ? `rgba(214,255,228,${a})` : `rgba(0,255,120,${a})`;
+            // glifo a posto = nero pieno; ancora in volo = grigio scuro
+            ctx.fillStyle = set ? `rgba(18,19,22,${a})` : `rgba(58,61,66,${a})`;
             ctx.fillText(p.char, x, y);
           }
         }
@@ -202,7 +209,7 @@ export default function IntroSplash() {
             ctx.globalAlpha = subA;
             ctx.font = "600 13px 'JetBrains Mono',monospace";
             ctx.textAlign = "center";
-            ctx.fillStyle = "#5b6b7a";
+            ctx.fillStyle = "#6f7378";
             ctx.fillText("I L   F U T U R O", cx, cy + fs * 0.62);
             ctx.restore();
           }
@@ -234,7 +241,7 @@ export default function IntroSplash() {
         position: "fixed",
         inset: 0,
         zIndex: 9999,
-        background: "#050806",
+        background: BG,
         opacity: state === "fading" ? 0 : 1,
         transition: "opacity 0.75s ease",
         pointerEvents: state === "fading" ? "none" : "auto",

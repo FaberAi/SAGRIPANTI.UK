@@ -30,7 +30,7 @@ export default function TradePanel({ symbol, currentPrice }: Props) {
       if (res.ok) {
         setMessage({ text: `✓ ${type} ${qty} ${symbol} @ $${data.price?.toFixed(2)} eseguito`, ok: true });
       } else {
-        setMessage({ text: `✗ ${data.error}`, ok: false });
+        setMessage({ text: `✗ ${data.error ?? "Operazione non riuscita"}`, ok: false });
       }
     } catch {
       setMessage({ text: "Errore di connessione", ok: false });

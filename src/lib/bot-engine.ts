@@ -149,6 +149,23 @@ export async function runBot(botId: number): Promise<RunResult> {
       return record("SKIP", signal.reason, `Liquidità insufficiente per comprare ${quantity} ${bot.symbol}`, price, quantity);
     }
 
+    // Cassa, trade e posizione aggiornati in un'unica transazione atomica.
+    const existing = await prisma.position.findFirst({
+      where: { portfolioId: portfolio.id, symbol: bot.symbol },
+    });
+    const positionOp = existing
+      ? prisma.position.update({
+          where: { id: existing.id },
+          data: {
+            quantity: existing.quantity + quantity,
+            avgPrice:
+              (existing.avgPrice * existing.quantity + price * quantity) /
+              (existing.quantity + quantity),
+          },
+        })
+      : prisma.position.create({
+          data: { symbol: bot.symbol, quantity, avgPrice: price, portfolioId: portfolio.id },
+        });
     await prisma.$transaction([
       prisma.portfolio.update({ where: { id: portfolio.id }, data: { cash: { decrement: total } } }),
       prisma.trade.create({
@@ -157,20 +174,8 @@ export async function runBot(botId: number): Promise<RunResult> {
           source: "bot", botName: bot.name, portfolioId: portfolio.id,
         },
       }),
+      positionOp,
     ]);
-
-    const existing = await prisma.position.findFirst({
-      where: { portfolioId: portfolio.id, symbol: bot.symbol },
-    });
-    if (existing) {
-      const newQty = existing.quantity + quantity;
-      const newAvg = (existing.avgPrice * existing.quantity + price * quantity) / newQty;
-      await prisma.position.update({ where: { id: existing.id }, data: { quantity: newQty, avgPrice: newAvg } });
-    } else {
-      await prisma.position.create({
-        data: { symbol: bot.symbol, quantity, avgPrice: price, portfolioId: portfolio.id },
-      });
-    }
     return record("BUY", signal.reason, `BUY ${quantity} ${bot.symbol} @ ${price.toFixed(2)} — ${signal.reason}`, price, quantity);
   }
 
@@ -183,6 +188,11 @@ export async function runBot(botId: number): Promise<RunResult> {
   }
 
   const total = price * quantity - fee;
+  const newQty = position.quantity - quantity;
+  const positionOp =
+    newQty <= 0.0001
+      ? prisma.position.delete({ where: { id: position.id } })
+      : prisma.position.update({ where: { id: position.id }, data: { quantity: newQty } });
   await prisma.$transaction([
     prisma.portfolio.update({ where: { id: portfolio.id }, data: { cash: { increment: total } } }),
     prisma.trade.create({
@@ -191,14 +201,8 @@ export async function runBot(botId: number): Promise<RunResult> {
         source: "bot", botName: bot.name, portfolioId: portfolio.id,
       },
     }),
+    positionOp,
   ]);
-
-  const newQty = position.quantity - quantity;
-  if (newQty <= 0) {
-    await prisma.position.delete({ where: { id: position.id } });
-  } else {
-    await prisma.position.update({ where: { id: position.id }, data: { quantity: newQty } });
-  }
   return record("SELL", signal.reason, `SELL ${quantity} ${bot.symbol} @ ${price.toFixed(2)} — ${signal.reason}`, price, quantity);
 }
 

@@ -16,24 +16,35 @@ export default function PortfolioPage() {
   const [resetting, setResetting] = useState(false);
 
   const fetchPortfolio = useCallback(async () => {
-    const res = await fetch("/api/portfolio");
-    const data = await res.json();
-    setPortfolio(data);
-    setLoading(false);
-    // fetch live prices for positions
-    if (data.positions?.length) {
-      const symbols: string[] = data.positions.map((p: Position) => p.symbol);
-      const lp: LivePrice = {};
-      await Promise.all(
-        symbols.map(async (sym: string) => {
-          try {
-            const r = await fetch(`/api/market?symbol=${sym}`);
-            const q = await r.json();
-            lp[sym] = q.price;
-          } catch { /* skip */ }
-        })
-      );
-      setPrices(lp);
+    try {
+      const res = await fetch("/api/portfolio");
+      const data = await res.json();
+      // l'API può rispondere con {error}: si accetta solo un portafoglio valido
+      if (!data || !Array.isArray(data.positions) || !Array.isArray(data.trades)) {
+        return;
+      }
+      setPortfolio(data);
+      // prezzi live per le posizioni aperte
+      if (data.positions.length) {
+        const symbols: string[] = data.positions.map((p: Position) => p.symbol);
+        const lp: LivePrice = {};
+        await Promise.all(
+          symbols.map(async (sym: string) => {
+            try {
+              const r = await fetch(`/api/market?symbol=${sym}`);
+              const q = await r.json();
+              if (q && typeof q.price === "number") lp[sym] = q.price;
+            } catch {
+              /* prezzo non disponibile: fallback al prezzo medio */
+            }
+          })
+        );
+        setPrices(lp);
+      }
+    } catch {
+      /* errore di rete transitorio: si riprova al prossimo intervallo */
+    } finally {
+      setLoading(false);
     }
   }, []);
 

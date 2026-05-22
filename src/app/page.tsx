@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
 import IntroSplash from "@/components/IntroSplash";
 
-/* ---------- helper: rivela al scroll ---------- */
+/* ---------- helper: rivela al scroll con framer-motion ---------- */
 function Reveal({
   children,
   delay = 0,
@@ -13,28 +14,141 @@ function Reveal({
   delay?: number;
   style?: React.CSSProperties;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.15 }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
   return (
-    <div ref={ref} className="reveal" style={{ animationDelay: `${delay}ms`, ...style }}>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-10% 0px" }}
+      transition={{ 
+        duration: 0.9, 
+        delay: delay / 1000, 
+        ease: [0.21, 0.47, 0.32, 0.98] 
+      }}
+      style={style}
+    >
       {children}
-    </div>
+    </motion.div>
+  );
+}
+
+/* ---------- Componente Division Card con effetto Glow ---------- */
+function DivisionCard({ d, i }: { d: Division; i: number }) {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
+  return (
+    <Reveal delay={i * 110}>
+      <motion.div 
+        className="div-card-light" 
+        onMouseMove={onMouseMove}
+        style={{ 
+          height: "100%", 
+          position: "relative", 
+          overflow: "hidden",
+          background: BG
+        }}
+      >
+        {/* Spotlight Effect */}
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: -1,
+            zIndex: 0,
+            background: useMotionTemplate`
+              radial-gradient(
+                350px circle at ${mouseX}px ${mouseY}px,
+                rgba(27, 29, 33, 0.04),
+                transparent 80%
+              )
+            `,
+          }}
+        />
+        
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 18,
+            }}
+          >
+            <span className="metal-ink wordmark" style={{ fontSize: 30 }}>
+              {d.n}
+            </span>
+            <span
+              style={{
+                fontSize: 10,
+                letterSpacing: "0.12em",
+                color: INK_FAINT,
+                textAlign: "right",
+                maxWidth: 150,
+              }}
+            >
+              {d.cat.toUpperCase()}
+            </span>
+          </div>
+          <div
+            style={{
+              fontSize: 24,
+              fontWeight: 800,
+              color: INK,
+              marginBottom: 10,
+            }}
+          >
+            {d.name}
+          </div>
+          <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6 }}>
+            {d.desc}
+          </p>
+          {d.href && (
+            <a
+              href={d.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="saguk-link-ink"
+              style={{
+                display: "inline-block",
+                marginTop: 16,
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              {d.link} →
+            </a>
+          )}
+          {d.sub && (
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "6px 14px",
+                marginTop: 16,
+              }}
+            >
+              {d.sub.map((s) => (
+                <a
+                  key={s.t}
+                  href={s.u}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="saguk-link-ink"
+                  style={{ fontSize: 12, fontWeight: 600 }}
+                >
+                  {s.t} →
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </Reveal>
   );
 }
 
@@ -119,7 +233,7 @@ const TAPPE: { anno: string; titolo: string; testo: string }[] = [
 ];
 
 /* ---------- palette vetrina — bianco sporco ---------- */
-const BG = "#f4f1ea";        // avorio caldo
+const BG = "#f5f4f1";        // bianco sporco — neutro, non beige
 const INK = "#1b1d21";       // testo primario, quasi-nero caldo
 const INK_SOFT = "#565a61";  // testo secondario
 const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
@@ -128,9 +242,24 @@ const HAIR = "#e4dfd4";      // linee e bordi
 /* ---------- pagina ---------- */
 export default function LandingPage() {
   const [photoOk, setPhotoOk] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Navbar: passa allo stato compatto dopo i primi 50px di scroll.
+  useEffect(() => {
+    const onScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <>
+      <div className="grain-overlay" />
       <IntroSplash />
 
       <div style={{ background: BG, color: INK, overflowX: "hidden" }}>
@@ -145,9 +274,11 @@ export default function LandingPage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "16px 28px",
-            background: "linear-gradient(180deg,rgba(244,241,234,0.94),rgba(244,241,234,0))",
-            backdropFilter: "blur(4px)",
+            padding: scrolled ? "12px 28px" : "20px 28px",
+            background: scrolled ? "rgba(244,241,234,0.85)" : "transparent",
+            backdropFilter: scrolled ? "blur(12px)" : "none",
+            borderBottom: scrolled ? `1px solid ${HAIR}` : "1px solid transparent",
+            transition: "all 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)"
           }}
         >
           <span className="wordmark" style={{ letterSpacing: "0.14em", fontSize: 13, color: INK }}>
@@ -159,11 +290,12 @@ export default function LandingPage() {
               fontSize: 11,
               letterSpacing: "0.14em",
               fontWeight: 600,
-              color: INK_SOFT,
+              color: scrolled ? INK : INK_SOFT,
               textDecoration: "none",
-              border: "1px solid #cdc8bb",
+              border: `1px solid ${scrolled ? INK : "#cdc8bb"}`,
               padding: "8px 16px",
               borderRadius: 3,
+              transition: "all 0.3s ease"
             }}
           >
             ACCEDI AL TERMINALE →
@@ -183,62 +315,88 @@ export default function LandingPage() {
             position: "relative",
           }}
         >
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             style={{
               fontSize: 12,
               letterSpacing: "0.5em",
               color: INK_FAINT,
               marginBottom: 26,
-              animation: "saguk-rise 1s ease 0.2s both",
             }}
           >
             G R U P P O &nbsp;·&nbsp; EST. 2026
-          </div>
-          <h1
+          </motion.div>
+          <motion.h1
             className="metal-ink wordmark"
+            initial="hidden"
+            animate="visible"
             style={{
               fontSize: "clamp(32px, 8vw, 122px)",
               letterSpacing: "0.01em",
               lineHeight: 1,
               margin: 0,
               maxWidth: "100%",
-              animation: "saguk-rise 1.1s cubic-bezier(0.2,0.7,0.2,1) 0.35s both",
+              display: "flex",
+              overflow: "hidden"
             }}
           >
-            SAGRIPANTI
-          </h1>
-          <p
+            {"SAGRIPANTI".split("").map((char, index) => (
+              <motion.span
+                key={index}
+                variants={{
+                  hidden: { y: "100%", opacity: 0 },
+                  visible: { y: 0, opacity: 1 }
+                }}
+                transition={{
+                  duration: 1,
+                  delay: 0.35 + index * 0.05,
+                  ease: [0.2, 0.7, 0.2, 1]
+                }}
+              >
+                {char}
+              </motion.span>
+            ))}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
             style={{
               marginTop: 30,
               fontSize: "clamp(15px, 2.2vw, 22px)",
               color: "#3c3f44",
               fontWeight: 500,
-              animation: "saguk-rise 1s ease 0.6s both",
             }}
           >
             Un gruppo. Molte direzioni.
-          </p>
-          <p
+          </motion.p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.75 }}
             style={{
               marginTop: 10,
               fontSize: 13,
               letterSpacing: "0.06em",
               color: INK_FAINT,
               maxWidth: 540,
-              animation: "saguk-rise 1s ease 0.75s both",
             }}
           >
             Tecnologia, editoria, ospitalità e servizi — costruiti con un solo
             principio: fare le cose come si deve.
-          </p>
-          <div
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
             style={{
               marginTop: 40,
               display: "flex",
               gap: 14,
               flexWrap: "wrap",
               justifyContent: "center",
-              animation: "saguk-rise 1s ease 0.9s both",
             }}
           >
             <a
@@ -271,18 +429,20 @@ export default function LandingPage() {
             >
               TRADING TERMINAL
             </Link>
-          </div>
-          <div
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 1.2 }}
             style={{
               position: "absolute",
               bottom: 28,
               fontSize: 20,
               color: "#bdbfc3",
-              animation: "saguk-rise 1s ease 1.2s both",
             }}
           >
             ↓
-          </div>
+          </motion.div>
         </section>
 
         {/* MANIFESTO */}
@@ -354,88 +514,7 @@ export default function LandingPage() {
             }}
           >
             {DIVISIONS.map((d, i) => (
-              <Reveal key={d.name} delay={i * 110}>
-                <div className="div-card-light" style={{ height: "100%" }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: 18,
-                    }}
-                  >
-                    <span
-                      className="metal-ink wordmark"
-                      style={{ fontSize: 30 }}
-                    >
-                      {d.n}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.12em",
-                        color: INK_FAINT,
-                        textAlign: "right",
-                        maxWidth: 150,
-                      }}
-                    >
-                      {d.cat.toUpperCase()}
-                    </span>
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 24,
-                      fontWeight: 800,
-                      color: INK,
-                      marginBottom: 10,
-                    }}
-                  >
-                    {d.name}
-                  </div>
-                  <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6 }}>
-                    {d.desc}
-                  </p>
-                  {d.href && (
-                    <a
-                      href={d.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="saguk-link-ink"
-                      style={{
-                        display: "inline-block",
-                        marginTop: 16,
-                        fontSize: 12,
-                        fontWeight: 600,
-                      }}
-                    >
-                      {d.link} →
-                    </a>
-                  )}
-                  {d.sub && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: "6px 14px",
-                        marginTop: 16,
-                      }}
-                    >
-                      {d.sub.map((s) => (
-                        <a
-                          key={s.t}
-                          href={s.u}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="saguk-link-ink"
-                          style={{ fontSize: 12, fontWeight: 600 }}
-                        >
-                          {s.t} →
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Reveal>
+              <DivisionCard key={d.name} d={d} i={i} />
             ))}
           </div>
         </section>
@@ -450,16 +529,19 @@ export default function LandingPage() {
         >
           <Reveal>
             <div className="founder-grid">
-              <div
+              <motion.div
                 className="founder-photo"
+                whileHover={{ scale: 1.02, rotateX: 5, rotateY: -5 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 style={{
                   position: "relative",
                   aspectRatio: "4 / 5",
                   borderRadius: 8,
                   overflow: "hidden",
                   border: `1px solid ${HAIR}`,
-                  background:
-                    "linear-gradient(160deg,#ece8df,#f4f1ea)",
+                  background: "linear-gradient(160deg,#ebeae6,#f5f4f1)",
+                  perspective: "1000px",
+                  transformStyle: "preserve-3d"
                 }}
               >
                 {photoOk ? (
@@ -473,6 +555,7 @@ export default function LandingPage() {
                       height: "100%",
                       objectFit: "cover",
                       filter: "grayscale(1) contrast(1.05)",
+                      pointerEvents: "none"
                     }}
                   />
                 ) : (
@@ -495,7 +578,7 @@ export default function LandingPage() {
                     public/fabrizio.jpg
                   </div>
                 )}
-              </div>
+              </motion.div>
               <div>
                 <div
                   style={{
@@ -546,8 +629,8 @@ export default function LandingPage() {
           </Reveal>
 
           {/* il percorso — timeline */}
-          <Reveal>
-            <div style={{ maxWidth: 760, marginTop: 64 }}>
+          <div style={{ maxWidth: 760, marginTop: 64, position: "relative" }}>
+            <Reveal>
               <div
                 style={{
                   fontSize: 11,
@@ -558,61 +641,83 @@ export default function LandingPage() {
               >
                 IL PERCORSO
               </div>
+            </Reveal>
+
+            <div style={{ position: "relative" }}>
+              {/* Linea di base della timeline */}
+              <div 
+                style={{ 
+                  position: "absolute", 
+                  left: 100, 
+                  top: 0, 
+                  bottom: 0, 
+                  width: 1, 
+                  background: HAIR 
+                }} 
+              />
+              
               {TAPPE.map((t, i) => (
-                <div
-                  key={t.anno}
-                  style={{ display: "grid", gridTemplateColumns: "96px 1fr" }}
-                >
+                <Reveal key={t.anno} delay={i * 80}>
                   <div
-                    className="wordmark"
-                    style={{
-                      fontSize: 13,
-                      color: INK_FAINT,
-                      paddingTop: 1,
-                      letterSpacing: "0.01em",
+                    style={{ 
+                      display: "grid", 
+                      gridTemplateColumns: "96px 1fr",
+                      marginBottom: i === TAPPE.length - 1 ? 0 : 34 
                     }}
                   >
-                    {t.anno}
-                  </div>
-                  <div
-                    style={{
-                      borderLeft: `1px solid ${HAIR}`,
-                      paddingLeft: 26,
-                      paddingBottom: i === TAPPE.length - 1 ? 0 : 34,
-                      position: "relative",
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: -5,
-                        top: 4,
-                        width: 9,
-                        height: 9,
-                        borderRadius: "50%",
-                        background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
-                      }}
-                    />
                     <div
+                      className="wordmark"
                       style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: INK,
-                        marginBottom: 7,
+                        fontSize: 13,
+                        color: INK_FAINT,
+                        paddingTop: 1,
+                        letterSpacing: "0.01em",
                       }}
                     >
-                      {t.titolo}
+                      {t.anno}
                     </div>
                     <div
-                      style={{ color: INK_SOFT, fontSize: 14, lineHeight: 1.65 }}
+                      style={{
+                        paddingLeft: 26,
+                        position: "relative",
+                      }}
                     >
-                      {t.testo}
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        whileInView={{ scale: 1 }}
+                        viewport={{ once: true }}
+                        style={{
+                          position: "absolute",
+                          left: -5,
+                          top: 4,
+                          width: 9,
+                          height: 9,
+                          borderRadius: "50%",
+                          background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                          zIndex: 2
+                        }}
+                      />
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: INK,
+                          marginBottom: 7,
+                        }}
+                      >
+                        {t.titolo}
+                      </div>
+                      <div
+                        style={{ color: INK_SOFT, fontSize: 14, lineHeight: 1.65 }}
+                      >
+                        {t.testo}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Reveal>
               ))}
             </div>
-          </Reveal>
+          </div>
 
           {/* il metodo */}
           <Reveal>
@@ -666,34 +771,56 @@ export default function LandingPage() {
         <footer
           style={{
             borderTop: `1px solid ${HAIR}`,
-            padding: "48px 24px",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 20,
-            justifyContent: "space-between",
-            alignItems: "center",
+            padding: "80px 24px",
             maxWidth: 1140,
             margin: "0 auto",
           }}
         >
-          <div>
-            <div
-              className="metal-ink wordmark"
-              style={{ fontSize: 14, letterSpacing: "0.06em" }}
-            >
-              GRUPPO SAGRIPANTI
+          <div style={{ 
+            display: "grid", 
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+            gap: 40,
+            marginBottom: 60
+          }}>
+            <div>
+              <div className="metal-ink wordmark" style={{ fontSize: 16, letterSpacing: "0.06em", marginBottom: 20 }}>
+                SAGRIPANTI
+              </div>
+              <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6, maxWidth: 240 }}>
+                Un gruppo multidisciplinare focalizzato sulla creazione di valore attraverso tecnologia, editoria e ospitalità.
+              </p>
             </div>
-            <div style={{ color: INK_FAINT, fontSize: 11, marginTop: 6 }}>
-              Trade Consulting Italia S.r.l.s. · © {new Date().getFullYear()}
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: INK, marginBottom: 20 }}>DIVISIONI</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {DIVISIONS.map(d => (
+                  <a key={d.name} href="#divisioni" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>{d.name}</a>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: INK, marginBottom: 20 }}>TERMINALE</div>
+              <Link href="/login" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>Trading Console</Link>
             </div>
           </div>
-          <Link
-            href="/login"
-            className="saguk-link-ink"
-            style={{ fontSize: 12, fontWeight: 600 }}
-          >
-            Accedi al Trading Terminal →
-          </Link>
+          
+          <div style={{ 
+            borderTop: `1px solid ${HAIR}`, 
+            paddingTop: 30,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 20
+          }}>
+            <div style={{ color: INK_FAINT, fontSize: 11 }}>
+              Trade Consulting Italia S.r.l.s. · P.IVA IT1234567890 · © {new Date().getFullYear()}
+            </div>
+            <div style={{ display: "flex", gap: 24 }}>
+              <a href="#" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>LINKEDIN</a>
+              <a href="#" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>INSTAGRAM</a>
+            </div>
+          </div>
         </footer>
       </div>
     </>

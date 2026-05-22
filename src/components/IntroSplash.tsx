@@ -15,7 +15,7 @@ interface Particle {
   delay: number;
 }
 
-const BG = "#f4f1ea"; // bianco sporco — coerente con la vetrina
+const BG = "#f5f4f1"; // bianco sporco — coerente con la vetrina
 
 const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネ0123456789ﾊﾋﾌﾍﾎ<>=/{}*+#$".split("");
 const pick = () => CHARS[(Math.random() * CHARS.length) | 0];

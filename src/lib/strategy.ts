@@ -1,6 +1,6 @@
 import { sma, rsi, macd } from "./indicators";
 
-export type Strategy = "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL";
+export type Strategy = "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL" | "CONFLUENCE";
 
 export interface Signal {
   action: "BUY" | "SELL" | "HOLD";
@@ -60,6 +60,42 @@ export function computeSignal(
     if (last.macd < last.signal && prev.macd >= prev.signal)
       return { action: "SELL", reason: "MACD è sceso sotto la signal line" };
     return { action: "HOLD", reason: "Nessun incrocio MACD" };
+  }
+
+  if (strategy === "CONFLUENCE") {
+    const rsiPeriod = params.rsiPeriod ?? 14;
+    const fast = params.fast ?? 20;
+    const slow = params.slow ?? 50;
+    const mFast = params.mFast ?? 12;
+    const mSlow = params.mSlow ?? 26;
+    const mSignal = params.mSignal ?? 9;
+
+    const rsiValues = rsi(closes, rsiPeriod);
+    const fastSma = sma(closes, fast);
+    const slowSma = sma(closes, slow);
+    const macdValues = macd(closes, mFast, mSlow, mSignal);
+
+    if (rsiValues.length === 0 || fastSma.length === 0 || slowSma.length === 0 || macdValues.length < 2) {
+      return { action: "HOLD", reason: "Indicatori insufficienti per la confluenza" };
+    }
+
+    const n = closes.length - 1;
+    const lastRsi = rsiValues[rsiValues.length - 1].value;
+    const isBullishSma = fastSma[n] > slowSma[n];
+    const lastMacd = macdValues[macdValues.length - 1];
+    const prevMacd = macdValues[macdValues.length - 2];
+    const macdCrossUp = lastMacd.macd > lastMacd.signal && prevMacd.macd <= prevMacd.signal;
+    const macdCrossDown = lastMacd.macd < lastMacd.signal && prevMacd.macd >= prevMacd.signal;
+
+    // BUY: RSI < 45 (ipervenduto o zona di accumulo) + SMA Bullish + MACD Cross Up
+    if (lastRsi < 45 && isBullishSma && macdCrossUp) {
+      return { action: "BUY", reason: `Confluenza rialzista: RSI(${lastRsi.toFixed(1)}), SMA Trend UP, MACD CrossUp` };
+    }
+    // SELL: RSI > 55 (ipercomprato o zona di distribuzione) + SMA Bearish + MACD Cross Down
+    if (lastRsi > 55 && !isBullishSma && macdCrossDown) {
+      return { action: "SELL", reason: `Confluenza ribassista: RSI(${lastRsi.toFixed(1)}), SMA Trend DOWN, MACD CrossDown` };
+    }
+    return { action: "HOLD", reason: `Nessuna confluenza valida (RSI: ${lastRsi.toFixed(1)}, Trend: ${isBullishSma ? "UP" : "DOWN"})` };
   }
 
   return { action: "HOLD", reason: "Strategia sconosciuta" };

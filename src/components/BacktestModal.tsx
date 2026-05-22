@@ -39,6 +39,7 @@ const STRATEGY_LABEL: Record<string, string> = {
   MA_CROSSOVER: "MA Crossover",
   RSI_REVERSION: "RSI Mean Reversion",
   MACD_SIGNAL: "MACD Signal",
+  CONFLUENCE: "Confluenza",
 };
 
 const fmtMoney = (n: number) =>

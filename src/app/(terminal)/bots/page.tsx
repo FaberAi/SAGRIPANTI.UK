@@ -30,12 +30,14 @@ const STRATEGIES = [
   { value: "MA_CROSSOVER", label: "MA Crossover", desc: "Compra quando SMA veloce supera SMA lenta" },
   { value: "RSI_REVERSION", label: "RSI Mean Reversion", desc: "Compra su RSI < 30, vende su RSI > 70" },
   { value: "MACD_SIGNAL", label: "MACD Signal", desc: "Segue gli incroci della MACD Signal Line" },
+  { value: "CONFLUENCE", label: "Confluenza", desc: "Opera solo quando RSI, trend SMA e MACD concordano" },
 ];
 
 const DEFAULT_PARAMS: Record<string, Record<string, number>> = {
   MA_CROSSOVER: { fast: 20, slow: 50, quantity: 1 },
   RSI_REVERSION: { period: 14, oversold: 30, overbought: 70, quantity: 1 },
   MACD_SIGNAL: { fast: 12, slow: 26, signal: 9, quantity: 1 },
+  CONFLUENCE: { rsiPeriod: 14, fast: 20, slow: 50, mFast: 12, mSlow: 26, mSignal: 9, quantity: 1 },
 };
 
 function timeAgo(iso: string | null): string {
@@ -238,7 +240,7 @@ export default function BotsPage() {
       )}
 
       {/* Strategies info */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
         {STRATEGIES.map((s) => (
           <div key={s.value} className="card" style={{ padding: 14 }}>
             <div style={{ color: "#00d4ff", fontSize: 12, fontWeight: 700, marginBottom: 4 }}>{s.label}</div>

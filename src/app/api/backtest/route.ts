@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 // Il backtest fa una chiamata esterna (Yahoo / CoinGecko): margine di tempo.
 export const maxDuration = 30;
 
-const VALID_STRATEGIES: Strategy[] = ["MA_CROSSOVER", "RSI_REVERSION", "MACD_SIGNAL"];
+const VALID_STRATEGIES: Strategy[] = ["MA_CROSSOVER", "RSI_REVERSION", "MACD_SIGNAL", "CONFLUENCE"];
 
 /** Esegue un backtest su un anno di storico e restituisce le metriche. */
 export async function POST(req: NextRequest) {

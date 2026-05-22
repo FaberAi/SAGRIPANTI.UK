@@ -1,6 +1,7 @@
 import { prisma } from "./prisma";
 import { getHistoricalData, getQuote } from "./market";
 import { computeSignal, type Strategy, type Signal } from "./strategy";
+import { sendTelegram, formatBotSignal } from "./telegram";
 
 export type { Strategy } from "./strategy";
 
@@ -30,7 +31,10 @@ async function getSignal(
  * piazza il trade e registra sempre un BotRun nello storico.
  */
 export async function runBot(botId: number): Promise<RunResult> {
-  const bot = await prisma.botConfig.findUnique({ where: { id: botId } });
+  const bot = await prisma.botConfig.findUnique({
+    where: { id: botId },
+    include: { user: { select: { telegramChatId: true } } },
+  });
   if (!bot) return { botId, botName: "?", action: "ERROR", message: "Bot non trovato" };
 
   // Persiste un BotRun e aggiorna lo stato del bot, poi restituisce il RunResult.
@@ -51,6 +55,22 @@ export async function runBot(botId: number): Promise<RunResult> {
         data: { lastRunAt: new Date(), lastSignal: tracksSignal ? action : bot.lastSignal },
       }),
     ]);
+
+    // Notifica Telegram sugli ordini eseguiti, se il proprietario ha collegato
+    // il proprio account. Si attende l'invio (su serverless la funzione può
+    // terminare prima di un invio fire-and-forget); l'esito non blocca nulla.
+    if (
+      (action === "BUY" || action === "SELL") &&
+      bot.user.telegramChatId &&
+      price !== undefined &&
+      quantity !== undefined
+    ) {
+      await sendTelegram(
+        bot.user.telegramChatId,
+        formatBotSignal({ botName: bot.name, symbol: bot.symbol, action, quantity, price, reason })
+      ).catch(() => {});
+    }
+
     return { botId, botName: bot.name, action, message };
   };
 

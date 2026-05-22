@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import BacktestModal, { type BacktestConfig } from "@/components/BacktestModal";
+import TelegramSettings from "@/components/TelegramSettings";
 
 interface BotRun {
   id: number;
@@ -154,6 +155,8 @@ export default function BotsPage() {
           Ogni esecuzione resta nello storico.
         </div>
       </div>
+
+      <TelegramSettings />
 
       {/* New bot form */}
       {showForm && (

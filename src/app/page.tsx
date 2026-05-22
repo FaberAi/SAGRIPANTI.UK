@@ -85,22 +85,36 @@ const DIVISIONS: Division[] = [
   },
 ];
 
-const PROFILO: { k: string; v: string }[] = [
+const TAPPE: { anno: string; titolo: string; testo: string }[] = [
   {
-    k: "Ruolo",
-    v: "Fondatore e presidente del Gruppo Sagripanti. Imprenditore: progetto e porto sul mercato prodotti digitali e attività reali.",
+    anno: "1966",
+    titolo: "Le origini, a Roma",
+    testo:
+      "Nasce il 29 novembre a Roma, in una famiglia che lavora nella grande distribuzione.",
   },
   {
-    k: "Le imprese",
-    v: "FaberAi (tecnologia), tre testate editoriali, PolizzaDoc (insurtech) e Love Me (ospitalità).",
+    anno: "1984",
+    titolo: "GSA Ipermercato",
+    testo:
+      "I genitori aprono a Le Rughe, a Formello, il primo ipermercato della provincia di Roma. Seguiranno i punti vendita di Colle Prenestino, Eur-Laurentino, Spinaceto, Palombara e Bracciano.",
   },
   {
-    k: "Come lavoro",
-    v: "Strategia di prodotto, direzione tecnica ed esperienza d'uso — dall'idea iniziale al prodotto online, con l'intelligenza artificiale come leva operativa.",
+    anno: "Anni '90",
+    titolo: "Tra l'azienda di famiglia e i progetti propri",
+    testo:
+      "Dopo gli studi entra nelle attività di famiglia e, in parallelo, avvia i primi progetti personali: consulenza aziendale, assicurazioni, finanziamenti, gestionali d'impresa.",
   },
   {
-    k: "Società",
-    v: "Trade Consulting Italia S.r.l.s. — titolare e fornitrice dei prodotti del Gruppo.",
+    anno: "2010",
+    titolo: "Da Caffè Residence a Love Me",
+    testo:
+      "Rileva per concessione famigliare il Caffè Residence di Bracciano. Lo ristruttura e ne fa un marchio: nasce Love Me. Qualche anno dopo apre il secondo locale, Love Me Cafè del Corso.",
+  },
+  {
+    anno: "Oggi",
+    titolo: "Il Gruppo Sagripanti",
+    testo:
+      "Dagli incontri e dall'esperienza nascono nuove direzioni — editoria, organizzazione d'impresa, tecnologia. Oggi convivono sotto un'unica casa: il Gruppo Sagripanti.",
   },
 ];
 
@@ -505,7 +519,7 @@ export default function LandingPage() {
                     fontWeight: 600,
                   }}
                 >
-                  IMPRENDITORE · FONDATORE & PRESIDENTE
+                  FONDATORE DEL GRUPPO · PRODUCT BUILDER
                 </div>
                 <p
                   style={{
@@ -515,65 +529,95 @@ export default function LandingPage() {
                     marginTop: 22,
                   }}
                 >
-                  Ho sempre pensato che un&apos;idea valga poco finché non
-                  diventa qualcosa che una persona può aprire, usare, pagare.
-                  Tutto il resto è una conversazione.
+                  Progetto idee di business e le porto fino al prodotto online,
+                  dominio incluso: software gestionali e piattaforme editoriali
+                  con pagamenti, multi-utente e infrastruttura cloud. Non
+                  prototipi — prodotti veri, con clienti veri.
                 </p>
               </div>
             </div>
           </Reveal>
 
-          {/* il racconto */}
+          {/* il percorso — timeline */}
           <Reveal>
-            <div
-              style={{
-                maxWidth: 740,
-                marginTop: 60,
-                display: "flex",
-                flexDirection: "column",
-                gap: 22,
-              }}
-            >
-              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
-                Per anni, tra l&apos;idea e il prodotto c&apos;era di mezzo
-                un&apos;azienda intera: un team, un budget, tempi lunghi. Quella
-                distanza fermava la maggior parte delle idee. Poi si è
-                accorciata: con gli strumenti giusti — e sapendo <em>cosa</em>{" "}
-                costruire e <em>perché</em> — oggi una sola persona può portare
-                un prodotto dall&apos;idea al mercato. Non un prototipo: un
-                prodotto vivo, con clienti veri.
-              </p>
-              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
-                Da qui è nato il Gruppo Sagripanti: non un singolo progetto, ma
-                una casa per imprese diverse — la tecnologia di FaberAi, le
-                testate editoriali, l&apos;insurtech di PolizzaDoc, i caffè Love
-                Me a Bracciano. Il mio mestiere non è scrivere codice riga per
-                riga: è decidere cosa costruire, come dev&apos;essere fatto
-                dentro e come si vende — e usare l&apos;intelligenza artificiale
-                come leva per realizzarlo. Da solo, mando avanti un portafoglio
-                di prodotti che fino a pochi anni fa avrebbe richiesto una
-                squadra.
-              </p>
-              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
-                Love Me, in particolare, è il mio banco di prova: un&apos;attività
-                vera, fatta di persone, di cassa e di fornitori, dove ogni giorno
-                metto alla prova il software che vendo agli altri. Un principio
-                tiene insieme tutto quanto:{" "}
-                <span className="metal-text" style={{ fontWeight: 700 }}>
-                  se non è sensibilmente migliore di quello che si otterrebbe con
-                  poco sforzo, non è pronto.
-                </span>
-              </p>
+            <div style={{ maxWidth: 760, marginTop: 64 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  letterSpacing: "0.3em",
+                  color: "#5b6b7a",
+                  marginBottom: 32,
+                }}
+              >
+                IL PERCORSO
+              </div>
+              {TAPPE.map((t, i) => (
+                <div
+                  key={t.anno}
+                  style={{ display: "grid", gridTemplateColumns: "96px 1fr" }}
+                >
+                  <div
+                    className="wordmark"
+                    style={{
+                      fontSize: 13,
+                      color: "#7c8a99",
+                      paddingTop: 1,
+                      letterSpacing: "0.01em",
+                    }}
+                  >
+                    {t.anno}
+                  </div>
+                  <div
+                    style={{
+                      borderLeft: "1px solid #1e2d40",
+                      paddingLeft: 26,
+                      paddingBottom: i === TAPPE.length - 1 ? 0 : 34,
+                      position: "relative",
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: "absolute",
+                        left: -5,
+                        top: 4,
+                        width: 9,
+                        height: 9,
+                        borderRadius: "50%",
+                        background: "linear-gradient(180deg,#e9edf0,#79828a)",
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#eef2f6",
+                        marginBottom: 7,
+                      }}
+                    >
+                      {t.titolo}
+                    </div>
+                    <div
+                      style={{ color: "#8b97a6", fontSize: 14, lineHeight: 1.65 }}
+                    >
+                      {t.testo}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </Reveal>
 
-          {/* la scheda */}
+          {/* il metodo */}
           <Reveal>
             <div
               style={{
-                marginTop: 60,
+                maxWidth: 760,
+                marginTop: 56,
                 borderTop: "1px solid #16202f",
                 paddingTop: 44,
+                display: "flex",
+                flexDirection: "column",
+                gap: 22,
               }}
             >
               <div
@@ -581,43 +625,32 @@ export default function LandingPage() {
                   fontSize: 11,
                   letterSpacing: "0.3em",
                   color: "#5b6b7a",
-                  marginBottom: 30,
                 }}
               >
-                IN SINTESI
+                IL METODO
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-                  gap: "30px 44px",
-                }}
-              >
-                {PROFILO.map((r) => (
-                  <div key={r.k}>
-                    <div
-                      style={{
-                        fontSize: 10,
-                        letterSpacing: "0.14em",
-                        color: "#00d4ff",
-                        fontWeight: 700,
-                        marginBottom: 9,
-                      }}
-                    >
-                      {r.k.toUpperCase()}
-                    </div>
-                    <div
-                      style={{
-                        color: "#cdd6e0",
-                        fontSize: 14,
-                        lineHeight: 1.65,
-                      }}
-                    >
-                      {r.v}
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
+                Il mio mestiere non è scrivere il codice riga per riga: è
+                decidere <em>cosa</em> costruire e <em>perché</em>, dirigere
+                l&apos;architettura e il prodotto, riconoscere quando una
+                soluzione è sbagliata. Lo sviluppo lo realizzo con
+                l&apos;intelligenza artificiale come leva — come un direttore di
+                produzione non monta personalmente la pellicola.
+              </p>
+              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
+                È una scelta di metodo, non una scorciatoia: oggi permette a una
+                sola persona di mandare avanti un portfolio di prodotti veri —
+                da KONTRO, gestionale SaaS con pagamenti e multi-utente, alle
+                testate editoriali — che fino a pochi anni fa avrebbe richiesto
+                una squadra intera. Un principio tiene insieme tutto quanto:{" "}
+                <span className="metal-text" style={{ fontWeight: 700 }}>
+                  se non è sensibilmente migliore di quello che si otterrebbe
+                  con poco sforzo, non è pronto.
+                </span>
+              </p>
+              <p style={{ color: "#5b6b7a", fontSize: 13, marginTop: 4 }}>
+                Sposato con Maria Teresa, padre di Alessia e Giulia.
+              </p>
             </div>
           </Reveal>
         </section>

@@ -1,37 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { verifyPassword } from "@/lib/auth";
+import { signSession, SESSION_COOKIE } from "@/lib/session";
 
-// Gate ad accesso unico: ID operatore (TRADING_USER) + password
-// (TRADING_PASSWORD). In caso di esito positivo si imposta un cookie httpOnly
-// che vale AUTH_TOKEN; il middleware lo confronta per proteggere le rotte del
-// terminale.
-const COOKIE = "saguk_auth";
-
+// Login multi-utente: email + password. In caso di esito positivo si imposta
+// un cookie httpOnly con l'id utente firmato (vedi lib/session).
 export async function POST(req: NextRequest) {
-  let id = "";
+  let email = "";
   let password = "";
   try {
     const body = await req.json();
-    id = body?.id ?? "";
-    password = body?.password ?? "";
+    email = String(body?.email ?? "").trim().toLowerCase();
+    password = String(body?.password ?? "");
   } catch {
-    id = "";
-    password = "";
+    /* corpo non valido */
   }
 
-  const expectedPassword = process.env.TRADING_PASSWORD;
-  const expectedUser = process.env.TRADING_USER;
-  // L'ID è verificato solo se TRADING_USER è configurato: evita il lock-out
-  // se la variabile non è ancora stata impostata su Vercel.
-  const idOk = !expectedUser || id === expectedUser;
-  if (!expectedPassword || password !== expectedPassword || !idOk) {
-    return NextResponse.json(
-      { error: "Credenziali non valide" },
-      { status: 401 }
-    );
+  if (!email || !password) {
+    return NextResponse.json({ error: "Credenziali non valide" }, { status: 401 });
   }
 
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(COOKIE, process.env.AUTH_TOKEN ?? "", {
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (!user || !user.active || !verifyPassword(password, user.passwordHash)) {
+    return NextResponse.json({ error: "Credenziali non valide" }, { status: 401 });
+  }
+
+  const res = NextResponse.json({ ok: true, name: user.name, isAdmin: user.isAdmin });
+  res.cookies.set(SESSION_COOKIE, await signSession(user.id), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
@@ -43,6 +38,6 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
-  res.cookies.set(COOKIE, "", { path: "/", maxAge: 0 });
+  res.cookies.set(SESSION_COOKIE, "", { path: "/", maxAge: 0 });
   return res;
 }

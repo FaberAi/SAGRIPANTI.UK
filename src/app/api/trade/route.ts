@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getQuote } from "@/lib/market";
+import { getUserId } from "@/lib/session";
 
 export async function POST(req: NextRequest) {
   try {
+    const userId = await getUserId(req);
+    if (!userId) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+
     const { symbol, type, quantity } = (await req.json()) as {
       symbol: string;
       type: "BUY" | "SELL";
@@ -14,9 +18,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Parametri non validi" }, { status: 400 });
     }
 
-    let portfolio = await prisma.portfolio.findFirst({ include: { positions: true } });
+    let portfolio = await prisma.portfolio.findFirst({
+      where: { userId },
+      include: { positions: true },
+    });
     if (!portfolio) {
-      portfolio = await prisma.portfolio.create({ data: {}, include: { positions: true } });
+      portfolio = await prisma.portfolio.create({
+        data: { userId },
+        include: { positions: true },
+      });
     }
 
     const price = (await getQuote(symbol)).price;

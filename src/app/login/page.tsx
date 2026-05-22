@@ -3,20 +3,20 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function LoginPage() {
-  const [userId, setUserId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId || !password || loading) return;
+    if (!email || !password || loading) return;
     setLoading(true);
     setError("");
     const res = await fetch("/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: userId, password }),
+      body: JSON.stringify({ email, password }),
     });
     if (res.ok) {
       const next = new URLSearchParams(window.location.search).get("next");
@@ -27,6 +27,18 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  const inputStyle = (err: boolean): React.CSSProperties => ({
+    width: "100%",
+    background: "#0a0e17",
+    border: `1px solid ${err ? "#ff4466" : "#243349"}`,
+    borderRadius: 4,
+    color: "#e2e8f0",
+    padding: "12px 14px",
+    fontSize: 14,
+    fontFamily: "inherit",
+    outline: "none",
+  });
 
   return (
     <div
@@ -92,27 +104,16 @@ export default function LoginPage() {
             marginBottom: 8,
           }}
         >
-          ID operatore
+          Email
         </label>
         <input
-          type="text"
+          type="email"
           autoFocus
           autoComplete="username"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="ID"
-          style={{
-            width: "100%",
-            background: "#0a0e17",
-            border: `1px solid ${error ? "#ff4466" : "#243349"}`,
-            borderRadius: 4,
-            color: "#e2e8f0",
-            padding: "12px 14px",
-            fontSize: 14,
-            fontFamily: "inherit",
-            outline: "none",
-            marginBottom: 18,
-          }}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="nome@esempio.com"
+          style={{ ...inputStyle(!!error), marginBottom: 18 }}
         />
 
         <label
@@ -125,7 +126,7 @@ export default function LoginPage() {
             marginBottom: 8,
           }}
         >
-          Password d&apos;accesso
+          Password
         </label>
         <input
           type="password"
@@ -133,17 +134,7 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••••"
-          style={{
-            width: "100%",
-            background: "#0a0e17",
-            border: `1px solid ${error ? "#ff4466" : "#243349"}`,
-            borderRadius: 4,
-            color: "#e2e8f0",
-            padding: "12px 14px",
-            fontSize: 14,
-            fontFamily: "inherit",
-            outline: "none",
-          }}
+          style={inputStyle(!!error)}
         />
 
         {error && (

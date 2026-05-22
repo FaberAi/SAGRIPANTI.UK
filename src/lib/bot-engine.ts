@@ -1,13 +1,9 @@
 import { prisma } from "./prisma";
 import { getHistoricalData, getQuote } from "./market";
-import { sma, rsi, macd } from "./indicators";
+import { computeSignal, type Strategy, type Signal } from "./strategy";
+import { sendTelegram, formatBotSignal } from "./telegram";
 
-export type Strategy = "MA_CROSSOVER" | "RSI_REVERSION" | "MACD_SIGNAL";
-
-interface Signal {
-  action: "BUY" | "SELL" | "HOLD";
-  reason: string;
-}
+export type { Strategy } from "./strategy";
 
 /** Esito di una singola esecuzione di un bot. */
 export interface RunResult {
@@ -26,52 +22,7 @@ async function getSignal(
   // giorni, quindi servono range ampi per avere abbastanza punti (>= 30).
   const data = await getHistoricalData(symbol, "1d", "1y");
   const closes = data.map((d) => d.close);
-
-  if (closes.length < 30) return { action: "HOLD", reason: "Dati storici insufficienti" };
-
-  if (strategy === "MA_CROSSOVER") {
-    const fast = params.fast ?? 20;
-    const slow = params.slow ?? 50;
-    const fastSma = sma(closes, fast);
-    const slowSma = sma(closes, slow);
-    const n = closes.length - 1;
-    if (isNaN(fastSma[n]) || isNaN(slowSma[n])) return { action: "HOLD", reason: "SMA non calcolabile" };
-
-    const crossAbove = fastSma[n] > slowSma[n] && fastSma[n - 1] <= slowSma[n - 1];
-    const crossBelow = fastSma[n] < slowSma[n] && fastSma[n - 1] >= slowSma[n - 1];
-    if (crossAbove) return { action: "BUY", reason: `SMA${fast} ha superato SMA${slow}` };
-    if (crossBelow) return { action: "SELL", reason: `SMA${fast} è sceso sotto SMA${slow}` };
-    return { action: "HOLD", reason: "Nessun crossover" };
-  }
-
-  if (strategy === "RSI_REVERSION") {
-    const period = params.period ?? 14;
-    const oversold = params.oversold ?? 30;
-    const overbought = params.overbought ?? 70;
-    const rsiValues = rsi(closes, period);
-    if (rsiValues.length === 0) return { action: "HOLD", reason: "RSI non calcolabile" };
-    const lastRsi = rsiValues[rsiValues.length - 1].value;
-    if (lastRsi < oversold) return { action: "BUY", reason: `RSI ${lastRsi.toFixed(1)} < ${oversold} (oversold)` };
-    if (lastRsi > overbought) return { action: "SELL", reason: `RSI ${lastRsi.toFixed(1)} > ${overbought} (overbought)` };
-    return { action: "HOLD", reason: `RSI neutro: ${lastRsi.toFixed(1)}` };
-  }
-
-  if (strategy === "MACD_SIGNAL") {
-    const fast = params.fast ?? 12;
-    const slow = params.slow ?? 26;
-    const signal = params.signal ?? 9;
-    const macdValues = macd(closes, fast, slow, signal);
-    if (macdValues.length < 2) return { action: "HOLD", reason: "MACD non calcolabile" };
-    const last = macdValues[macdValues.length - 1];
-    const prev = macdValues[macdValues.length - 2];
-    if (last.macd > last.signal && prev.macd <= prev.signal)
-      return { action: "BUY", reason: "MACD ha superato la signal line" };
-    if (last.macd < last.signal && prev.macd >= prev.signal)
-      return { action: "SELL", reason: "MACD è sceso sotto la signal line" };
-    return { action: "HOLD", reason: "Nessun incrocio MACD" };
-  }
-
-  return { action: "HOLD", reason: "Strategia sconosciuta" };
+  return computeSignal(closes, strategy, params);
 }
 
 /**
@@ -80,7 +31,10 @@ async function getSignal(
  * piazza il trade e registra sempre un BotRun nello storico.
  */
 export async function runBot(botId: number): Promise<RunResult> {
-  const bot = await prisma.botConfig.findUnique({ where: { id: botId } });
+  const bot = await prisma.botConfig.findUnique({
+    where: { id: botId },
+    include: { user: { select: { telegramChatId: true } } },
+  });
   if (!bot) return { botId, botName: "?", action: "ERROR", message: "Bot non trovato" };
 
   // Persiste un BotRun e aggiorna lo stato del bot, poi restituisce il RunResult.
@@ -101,6 +55,22 @@ export async function runBot(botId: number): Promise<RunResult> {
         data: { lastRunAt: new Date(), lastSignal: tracksSignal ? action : bot.lastSignal },
       }),
     ]);
+
+    // Notifica Telegram sugli ordini eseguiti, se il proprietario ha collegato
+    // il proprio account. Si attende l'invio (su serverless la funzione può
+    // terminare prima di un invio fire-and-forget); l'esito non blocca nulla.
+    if (
+      (action === "BUY" || action === "SELL") &&
+      bot.user.telegramChatId &&
+      price !== undefined &&
+      quantity !== undefined
+    ) {
+      await sendTelegram(
+        bot.user.telegramChatId,
+        formatBotSignal({ botName: bot.name, symbol: bot.symbol, action, quantity, price, reason })
+      ).catch(() => {});
+    }
+
     return { botId, botName: bot.name, action, message };
   };
 

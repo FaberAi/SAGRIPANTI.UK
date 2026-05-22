@@ -12,12 +12,14 @@ model User {
   id           Int         @id @default(autoincrement())
   email        String      @unique
   passwordHash String
-  name         String?
-  isAdmin      Boolean     @default(false)
-  active       Boolean     @default(true)
-  createdAt    DateTime    @default(now())
-  portfolio    Portfolio?
-  bots         BotConfig[]
+  name           String?
+  isAdmin        Boolean     @default(false)
+  active         Boolean     @default(true)
+  // Chat ID Telegram per le notifiche dei segnali dei bot (null = non collegato).
+  telegramChatId String?
+  createdAt      DateTime    @default(now())
+  portfolio      Portfolio?
+  bots           BotConfig[]
 }
 
 model Portfolio {

@@ -60,8 +60,14 @@ export default function ChartPage({ paramsPromise }: { paramsPromise: Promise<{ 
     fetch(`/api/market?action=history&symbol=${symbol}&interval=${range.interval}&range=${range.value}`)
       .then((r) => r.json())
       .then((d) => {
-        // l'API può rispondere con {error}: si accettano solo array validi
-        setData(Array.isArray(d) ? (d as OHLCV[]) : []);
+        // l'API può rispondere con {error}: si accettano solo array validi.
+        // lightweight-charts esige tempi unici e crescenti: deduplico e ordino.
+        const arr = Array.isArray(d) ? (d as OHLCV[]) : [];
+        const byTime = new Map<number, OHLCV>();
+        for (const c of arr) {
+          if (c && typeof c.time === "number") byTime.set(c.time, c);
+        }
+        setData([...byTime.values()].sort((a, b) => a.time - b.time));
         setLoading(false);
       })
       .catch(() => setLoading(false));

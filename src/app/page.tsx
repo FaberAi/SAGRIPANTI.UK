@@ -1,7 +1,14 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useMotionTemplate,
+  useScroll,
+  useTransform,
+  useSpring,
+} from "framer-motion";
 import IntroSplash from "@/components/IntroSplash";
 
 /* ---------- helper: rivela al scroll con framer-motion ---------- */
@@ -19,15 +26,100 @@ function Reveal({
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10% 0px" }}
-      transition={{ 
-        duration: 0.9, 
-        delay: delay / 1000, 
-        ease: [0.21, 0.47, 0.32, 0.98] 
+      transition={{
+        duration: 0.9,
+        delay: delay / 1000,
+        ease: [0.21, 0.47, 0.32, 0.98],
       }}
       style={style}
     >
       {children}
     </motion.div>
+  );
+}
+
+/* ---------- helper: wrapper "magnetico" — segue il cursore ---------- */
+function Magnetic({ children }: { children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const sx = useSpring(x, { stiffness: 220, damping: 16 });
+  const sy = useSpring(y, { stiffness: 220, damping: 16 });
+
+  function onMove(e: React.MouseEvent) {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    x.set((e.clientX - r.left - r.width / 2) * 0.4);
+    y.set((e.clientY - r.top - r.height / 2) * 0.4);
+  }
+  function onLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      style={{ x: sx, y: sy, display: "inline-block" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+/* ---------- nastro scorrevole dei marchi del Gruppo ---------- */
+const MARQUEE = [
+  "FaberAi",
+  "Everylife",
+  "Aqua e Sale",
+  "PetPolitan",
+  "PolizzaDoc",
+  "Love Me",
+  "KONTRO",
+  "Trading Terminal",
+];
+
+function Marquee() {
+  const items = [...MARQUEE, ...MARQUEE];
+  return (
+    <div
+      className="saguk-marquee-mask"
+      style={{
+        overflow: "hidden",
+        borderTop: `1px solid ${HAIR}`,
+        borderBottom: `1px solid ${HAIR}`,
+        padding: "20px 0",
+      }}
+    >
+      <motion.div
+        style={{ display: "flex", width: "max-content", whiteSpace: "nowrap" }}
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 34, ease: "linear", repeat: Infinity }}
+      >
+        {items.map((t, i) => (
+          <span
+            key={i}
+            style={{ display: "inline-flex", alignItems: "center" }}
+          >
+            <span
+              className="wordmark"
+              style={{
+                fontSize: 17,
+                letterSpacing: "0.1em",
+                color: INK,
+                padding: "0 30px",
+              }}
+            >
+              {t}
+            </span>
+            <span style={{ color: INK_FAINT, fontSize: 9 }}>◆</span>
+          </span>
+        ))}
+      </motion.div>
+    </div>
   );
 }
 
@@ -44,14 +136,14 @@ function DivisionCard({ d, i }: { d: Division; i: number }) {
 
   return (
     <Reveal delay={i * 110}>
-      <motion.div 
-        className="div-card-light" 
+      <motion.div
+        className="div-card-light"
         onMouseMove={onMouseMove}
-        style={{ 
-          height: "100%", 
-          position: "relative", 
+        style={{
+          height: "100%",
+          position: "relative",
           overflow: "hidden",
-          background: BG
+          background: BG,
         }}
       >
         {/* Spotlight Effect */}
@@ -69,7 +161,7 @@ function DivisionCard({ d, i }: { d: Division; i: number }) {
             `,
           }}
         />
-        
+
         <div style={{ position: "relative", zIndex: 1 }}>
           <div
             style={{
@@ -239,10 +331,39 @@ const INK_SOFT = "#565a61";  // testo secondario
 const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
 const HAIR = "#e4dfd4";      // linee e bordi
 
+/* Le animazioni one-shot della hero partono dopo l'IntroSplash (~5,6s):
+   altrimenti SAGRIPANTI comparirebbe lettera-per-lettera dietro lo splash. */
+const INTRO = 5.6;
+
 /* ---------- pagina ---------- */
 export default function LandingPage() {
   const [photoOk, setPhotoOk] = useState(true);
   const [scrolled, setScrolled] = useState(false);
+
+  // Avanzamento scroll dell'intera pagina → barra in cima.
+  const { scrollYProgress } = useScroll();
+  const barScale = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
+  // Parallasse della hero: il contenuto deriva verso l'alto e sfuma.
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroY = useTransform(heroProgress, [0, 1], [0, 130]);
+  const heroOpacity = useTransform(heroProgress, [0, 0.75], [1, 0]);
+
+  // La linea della timeline si "disegna" mentre scorri la sezione.
+  const timelineRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: lineProgress } = useScroll({
+    target: timelineRef,
+    offset: ["start 75%", "end 55%"],
+  });
+  const lineScale = useSpring(lineProgress, { stiffness: 120, damping: 30 });
 
   // Navbar: passa allo stato compatto dopo i primi 50px di scroll.
   useEffect(() => {
@@ -262,6 +383,21 @@ export default function LandingPage() {
       <div className="grain-overlay" />
       <IntroSplash />
 
+      {/* barra di avanzamento scroll */}
+      <motion.div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 2,
+          background: INK,
+          transformOrigin: "0% 50%",
+          scaleX: barScale,
+          zIndex: 101,
+        }}
+      />
+
       <div style={{ background: BG, color: INK, overflowX: "hidden" }}>
         {/* top bar */}
         <header
@@ -278,7 +414,7 @@ export default function LandingPage() {
             background: scrolled ? "rgba(244,241,234,0.85)" : "transparent",
             backdropFilter: scrolled ? "blur(12px)" : "none",
             borderBottom: scrolled ? `1px solid ${HAIR}` : "1px solid transparent",
-            transition: "all 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)"
+            transition: "all 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)",
           }}
         >
           <span className="wordmark" style={{ letterSpacing: "0.14em", fontSize: 13, color: INK }}>
@@ -295,7 +431,7 @@ export default function LandingPage() {
               border: `1px solid ${scrolled ? INK : "#cdc8bb"}`,
               padding: "8px 16px",
               borderRadius: 3,
-              transition: "all 0.3s ease"
+              transition: "all 0.3s ease",
             }}
           >
             ACCEDI AL TERMINALE →
@@ -304,6 +440,7 @@ export default function LandingPage() {
 
         {/* HERO */}
         <section
+          ref={heroRef}
           style={{
             minHeight: "100vh",
             display: "flex",
@@ -315,135 +452,187 @@ export default function LandingPage() {
             position: "relative",
           }}
         >
+          {/* macchie di luce che derivano lente dietro il titolo */}
+          <div
+            className="saguk-blob"
+            style={{
+              width: 520,
+              height: 520,
+              top: "-12%",
+              left: "-6%",
+              background: "rgba(150,162,184,0.30)",
+              animation: "saguk-drift 24s ease-in-out infinite",
+            }}
+          />
+          <div
+            className="saguk-blob"
+            style={{
+              width: 460,
+              height: 460,
+              bottom: "-10%",
+              right: "-4%",
+              background: "rgba(200,184,150,0.34)",
+              animation: "saguk-drift 30s ease-in-out infinite reverse",
+            }}
+          />
+
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
             style={{
-              fontSize: 12,
-              letterSpacing: "0.5em",
-              color: INK_FAINT,
-              marginBottom: 26,
-            }}
-          >
-            G R U P P O &nbsp;·&nbsp; EST. 2026
-          </motion.div>
-          <motion.h1
-            className="metal-ink wordmark"
-            initial="hidden"
-            animate="visible"
-            style={{
-              fontSize: "clamp(32px, 8vw, 122px)",
-              letterSpacing: "0.01em",
-              lineHeight: 1,
-              margin: 0,
-              maxWidth: "100%",
+              y: heroY,
+              opacity: heroOpacity,
+              position: "relative",
+              zIndex: 1,
               display: "flex",
-              overflow: "hidden"
+              flexDirection: "column",
+              alignItems: "center",
+              width: "100%",
             }}
           >
-            {"SAGRIPANTI".split("").map((char, index) => (
-              <motion.span
-                key={index}
-                variants={{
-                  hidden: { y: "100%", opacity: 0 },
-                  visible: { y: 0, opacity: 1 }
-                }}
-                transition={{
-                  duration: 1,
-                  delay: 0.35 + index * 0.05,
-                  ease: [0.2, 0.7, 0.2, 1]
-                }}
-              >
-                {char}
-              </motion.span>
-            ))}
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            style={{
-              marginTop: 30,
-              fontSize: "clamp(15px, 2.2vw, 22px)",
-              color: "#3c3f44",
-              fontWeight: 500,
-            }}
-          >
-            Un gruppo. Molte direzioni.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.75 }}
-            style={{
-              marginTop: 10,
-              fontSize: 13,
-              letterSpacing: "0.06em",
-              color: INK_FAINT,
-              maxWidth: 540,
-            }}
-          >
-            Tecnologia, editoria, ospitalità e servizi — costruiti con un solo
-            principio: fare le cose come si deve.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9 }}
-            style={{
-              marginTop: 40,
-              display: "flex",
-              gap: 14,
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            <a
-              href="#divisioni"
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: INTRO + 0.1 }}
               style={{
-                background: INK,
-                color: BG,
-                fontWeight: 700,
                 fontSize: 12,
-                letterSpacing: "0.1em",
-                padding: "13px 26px",
-                borderRadius: 3,
-                textDecoration: "none",
+                letterSpacing: "0.5em",
+                color: INK_FAINT,
+                marginBottom: 26,
               }}
             >
-              SCOPRI IL GRUPPO
-            </a>
-            <Link
-              href="/login"
+              G R U P P O &nbsp;·&nbsp; EST. 2026
+            </motion.div>
+            <motion.h1
+              className="metal-ink wordmark"
+              initial="hidden"
+              animate="visible"
               style={{
-                border: "1px solid #cdc8bb",
-                color: INK_SOFT,
-                fontWeight: 700,
-                fontSize: 12,
-                letterSpacing: "0.1em",
-                padding: "13px 26px",
-                borderRadius: 3,
-                textDecoration: "none",
+                fontSize: "clamp(32px, 8vw, 122px)",
+                letterSpacing: "0.01em",
+                lineHeight: 1,
+                margin: 0,
+                maxWidth: "100%",
+                display: "flex",
+                overflow: "hidden",
               }}
             >
-              TRADING TERMINAL
-            </Link>
+              {"SAGRIPANTI".split("").map((char, index) => (
+                <motion.span
+                  key={index}
+                  style={{ display: "inline-block" }}
+                  variants={{
+                    hidden: { y: "110%", opacity: 0, rotateX: -90 },
+                    visible: { y: 0, opacity: 1, rotateX: 0 },
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: INTRO + index * 0.13,
+                    ease: [0.2, 0.7, 0.2, 1],
+                  }}
+                >
+                  {char}
+                </motion.span>
+              ))}
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: INTRO + 1.5 }}
+              style={{
+                marginTop: 30,
+                fontSize: "clamp(15px, 2.2vw, 22px)",
+                color: "#3c3f44",
+                fontWeight: 500,
+              }}
+            >
+              Un gruppo. Molte direzioni.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: INTRO + 1.65 }}
+              style={{
+                marginTop: 10,
+                fontSize: 13,
+                letterSpacing: "0.06em",
+                color: INK_FAINT,
+                maxWidth: 540,
+              }}
+            >
+              Tecnologia, editoria, ospitalità e servizi — costruiti con un solo
+              principio: fare le cose come si deve.
+            </motion.p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: INTRO + 1.8 }}
+              style={{
+                marginTop: 40,
+                display: "flex",
+                gap: 14,
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              <Magnetic>
+                <a
+                  href="#divisioni"
+                  style={{
+                    display: "inline-block",
+                    background: INK,
+                    color: BG,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: "0.1em",
+                    padding: "13px 26px",
+                    borderRadius: 3,
+                    textDecoration: "none",
+                  }}
+                >
+                  SCOPRI IL GRUPPO
+                </a>
+              </Magnetic>
+              <Magnetic>
+                <Link
+                  href="/login"
+                  style={{
+                    display: "inline-block",
+                    border: "1px solid #cdc8bb",
+                    color: INK_SOFT,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    letterSpacing: "0.1em",
+                    padding: "13px 26px",
+                    borderRadius: 3,
+                    textDecoration: "none",
+                  }}
+                >
+                  TRADING TERMINAL
+                </Link>
+              </Magnetic>
+            </motion.div>
           </motion.div>
+
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 1.2 }}
+            animate={{ opacity: 1, y: [0, 9, 0] }}
+            transition={{
+              opacity: { duration: 1, delay: INTRO + 2.2 },
+              y: { duration: 1.8, repeat: Infinity, ease: "easeInOut" },
+            }}
             style={{
               position: "absolute",
               bottom: 28,
               fontSize: 20,
               color: "#bdbfc3",
+              zIndex: 1,
             }}
           >
             ↓
           </motion.div>
         </section>
+
+        {/* NASTRO MARCHI */}
+        <Marquee />
 
         {/* MANIFESTO */}
         <section style={{ padding: "100px 24px", maxWidth: 880, margin: "0 auto" }}>
@@ -541,7 +730,7 @@ export default function LandingPage() {
                   border: `1px solid ${HAIR}`,
                   background: "linear-gradient(160deg,#ebeae6,#f5f4f1)",
                   perspective: "1000px",
-                  transformStyle: "preserve-3d"
+                  transformStyle: "preserve-3d",
                 }}
               >
                 {photoOk ? (
@@ -555,7 +744,7 @@ export default function LandingPage() {
                       height: "100%",
                       objectFit: "cover",
                       filter: "grayscale(1) contrast(1.05)",
-                      pointerEvents: "none"
+                      pointerEvents: "none",
                     }}
                   />
                 ) : (
@@ -643,26 +832,39 @@ export default function LandingPage() {
               </div>
             </Reveal>
 
-            <div style={{ position: "relative" }}>
-              {/* Linea di base della timeline */}
-              <div 
-                style={{ 
-                  position: "absolute", 
-                  left: 100, 
-                  top: 0, 
-                  bottom: 0, 
-                  width: 1, 
-                  background: HAIR 
-                }} 
+            <div ref={timelineRef} style={{ position: "relative" }}>
+              {/* Binario grigio della timeline */}
+              <div
+                style={{
+                  position: "absolute",
+                  left: 100,
+                  top: 0,
+                  bottom: 0,
+                  width: 1,
+                  background: HAIR,
+                }}
               />
-              
+              {/* Linea che si "disegna" mentre scorri */}
+              <motion.div
+                style={{
+                  position: "absolute",
+                  left: 100,
+                  top: 0,
+                  bottom: 0,
+                  width: 1,
+                  background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                  transformOrigin: "top",
+                  scaleY: lineScale,
+                }}
+              />
+
               {TAPPE.map((t, i) => (
                 <Reveal key={t.anno} delay={i * 80}>
                   <div
-                    style={{ 
-                      display: "grid", 
+                    style={{
+                      display: "grid",
                       gridTemplateColumns: "96px 1fr",
-                      marginBottom: i === TAPPE.length - 1 ? 0 : 34 
+                      marginBottom: i === TAPPE.length - 1 ? 0 : 34,
                     }}
                   >
                     <div
@@ -694,7 +896,7 @@ export default function LandingPage() {
                           height: 9,
                           borderRadius: "50%",
                           background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
-                          zIndex: 2
+                          zIndex: 2,
                         }}
                       />
                       <div
@@ -776,11 +978,11 @@ export default function LandingPage() {
             margin: "0 auto",
           }}
         >
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: 40,
-            marginBottom: 60
+            marginBottom: 60,
           }}>
             <div>
               <div className="metal-ink wordmark" style={{ fontSize: 16, letterSpacing: "0.06em", marginBottom: 20 }}>
@@ -803,15 +1005,15 @@ export default function LandingPage() {
               <Link href="/login" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>Trading Console</Link>
             </div>
           </div>
-          
-          <div style={{ 
-            borderTop: `1px solid ${HAIR}`, 
+
+          <div style={{
+            borderTop: `1px solid ${HAIR}`,
             paddingTop: 30,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 20
+            gap: 20,
           }}>
             <div style={{ color: INK_FAINT, fontSize: 11 }}>
               Trade Consulting Italia S.r.l.s. · P.IVA IT1234567890 · © {new Date().getFullYear()}

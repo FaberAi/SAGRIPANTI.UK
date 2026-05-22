@@ -298,3 +298,32 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   80% { transform:translate(3%, 35%) }
   90% { transform:translate(-10%, 10%) }
 }
+
+/* ============ Movimento vetrina ============ */
+
+/* Macchie di luce che derivano lente dietro la hero — danno vita
+   al bianco sporco senza romperne l'eleganza da showroom. */
+@keyframes saguk-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(46px, -34px) scale(1.14); }
+  66%  { transform: translate(-32px, 30px) scale(0.92); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.saguk-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  will-change: transform;
+  z-index: 0;
+}
+
+/* Sfumatura ai bordi del nastro scorrevole dei marchi. */
+.saguk-marquee-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .saguk-blob { animation: none !important; }
+}

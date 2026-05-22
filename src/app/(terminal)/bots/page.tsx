@@ -52,6 +52,17 @@ function actionColor(action: string): string {
   return "#64748b";
 }
 
+// I parametri del bot sono salvati come stringa JSON: se per qualunque motivo
+// risultano corrotti, non deve crashare il render dell'intera pagina.
+function parseParams(raw: string): Record<string, number> {
+  try {
+    const p = JSON.parse(raw);
+    return p && typeof p === "object" ? (p as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
 export default function BotsPage() {
   const [bots, setBots] = useState<Bot[]>([]);
   const [showForm, setShowForm] = useState(false);
@@ -65,8 +76,15 @@ export default function BotsPage() {
   const [expanded, setExpanded] = useState<number | null>(null);
 
   const fetchBots = useCallback(async () => {
-    const res = await fetch("/api/bot");
-    setBots(await res.json());
+    try {
+      const res = await fetch("/api/bot");
+      const data = await res.json();
+      // l'API può rispondere con {error} (sessione scaduta, 5xx): si accetta
+      // solo un array, altrimenti la pagina crasherebbe su bots.map.
+      setBots(Array.isArray(data) ? data : []);
+    } catch {
+      /* errore di rete transitorio: si riprova al prossimo fetch */
+    }
   }, []);
 
   useEffect(() => { fetchBots(); }, [fetchBots]);
@@ -227,8 +245,8 @@ export default function BotsPage() {
             </thead>
             <tbody>
               {bots.map((bot) => {
-                const params = JSON.parse(bot.params) as Record<string, number>;
-                const lastRun = bot.runs[0];
+                const params = parseParams(bot.params);
+                const lastRun = bot.runs?.[0];
                 const isOpen = expanded === bot.id;
                 return [
                   <tr key={bot.id}>

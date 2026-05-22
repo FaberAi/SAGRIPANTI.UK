@@ -216,6 +216,39 @@ tr:hover td { background: rgba(0,212,255,0.03); }
 }
 .saguk-link:hover { border-color: var(--accent); }
 
+/* ---- Variante chiara: la vetrina vive su bianco sporco (il terminale
+   resta dark). Acciaio brunito che legge su avorio, card e link scuri. ---- */
+.metal-ink {
+  background: linear-gradient(176deg,
+    #6b7178 0%, #2a2d31 24%, #585d63 42%,
+    #16181b 56%, #4a4e54 72%, #1f2225 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.div-card-light {
+  background: #ffffff;
+  border: 1px solid #e4dfd4;
+  border-radius: 6px;
+  padding: 28px 26px;
+  transition: transform 0.35s cubic-bezier(0.2,0.7,0.2,1), border-color 0.35s, box-shadow 0.35s;
+}
+.div-card-light:hover {
+  transform: translateY(-6px);
+  border-color: #c9c3b4;
+  box-shadow: 0 20px 44px -24px rgba(40,35,25,0.42);
+}
+
+.saguk-link-ink {
+  color: #1b1d21;
+  text-decoration: none;
+  border-bottom: 1px solid #cdc8bb;
+  transition: border-color 0.2s;
+}
+.saguk-link-ink:hover { border-color: #1b1d21; }
+
 /* Sezione fondatore: due colonne su desktop, impilate su mobile
    (così il testo non resta schiacciato accanto alla foto). */
 .founder-grid {

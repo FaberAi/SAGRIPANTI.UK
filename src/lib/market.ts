@@ -115,6 +115,11 @@ async function getCryptoQuote(symbol: string): Promise<Quote> {
   );
   const data = await res.json() as Record<string, { usd: number; usd_24h_change: number; usd_market_cap: number; usd_24h_vol: number }>;
   const coin = data[id];
+  // CoinGecko in rate-limit può rispondere con un oggetto vuoto: senza questa
+  // guardia `coin.usd` lancerebbe un TypeError opaco.
+  if (!coin || typeof coin.usd !== "number") {
+    throw new Error(`Prezzo non disponibile per ${symbol}`);
+  }
   return {
     symbol,
     name: id.charAt(0).toUpperCase() + id.slice(1),

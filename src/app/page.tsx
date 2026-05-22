@@ -118,6 +118,13 @@ const TAPPE: { anno: string; titolo: string; testo: string }[] = [
   },
 ];
 
+/* ---------- palette vetrina — bianco sporco ---------- */
+const BG = "#f4f1ea";        // avorio caldo
+const INK = "#1b1d21";       // testo primario, quasi-nero caldo
+const INK_SOFT = "#565a61";  // testo secondario
+const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
+const HAIR = "#e4dfd4";      // linee e bordi
+
 /* ---------- pagina ---------- */
 export default function LandingPage() {
   const [photoOk, setPhotoOk] = useState(true);
@@ -126,7 +133,7 @@ export default function LandingPage() {
     <>
       <IntroSplash />
 
-      <div style={{ background: "#070b12", color: "#e2e8f0", overflowX: "hidden" }}>
+      <div style={{ background: BG, color: INK, overflowX: "hidden" }}>
         {/* top bar */}
         <header
           style={{
@@ -139,11 +146,11 @@ export default function LandingPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "16px 28px",
-            background: "linear-gradient(180deg,rgba(7,11,18,0.92),rgba(7,11,18,0))",
+            background: "linear-gradient(180deg,rgba(244,241,234,0.94),rgba(244,241,234,0))",
             backdropFilter: "blur(4px)",
           }}
         >
-          <span className="wordmark" style={{ letterSpacing: "0.14em", fontSize: 13 }}>
+          <span className="wordmark" style={{ letterSpacing: "0.14em", fontSize: 13, color: INK }}>
             SAGRIPANTI
           </span>
           <Link
@@ -152,9 +159,9 @@ export default function LandingPage() {
               fontSize: 11,
               letterSpacing: "0.14em",
               fontWeight: 600,
-              color: "#9aa6b4",
+              color: INK_SOFT,
               textDecoration: "none",
-              border: "1px solid #243349",
+              border: "1px solid #cdc8bb",
               padding: "8px 16px",
               borderRadius: 3,
             }}
@@ -180,7 +187,7 @@ export default function LandingPage() {
             style={{
               fontSize: 12,
               letterSpacing: "0.5em",
-              color: "#5b6b7a",
+              color: INK_FAINT,
               marginBottom: 26,
               animation: "saguk-rise 1s ease 0.2s both",
             }}
@@ -188,7 +195,7 @@ export default function LandingPage() {
             G R U P P O &nbsp;·&nbsp; EST. 2026
           </div>
           <h1
-            className="metal-text wordmark"
+            className="metal-ink wordmark"
             style={{
               fontSize: "clamp(32px, 8vw, 122px)",
               letterSpacing: "0.01em",
@@ -204,7 +211,7 @@ export default function LandingPage() {
             style={{
               marginTop: 30,
               fontSize: "clamp(15px, 2.2vw, 22px)",
-              color: "#aeb9c6",
+              color: "#3c3f44",
               fontWeight: 500,
               animation: "saguk-rise 1s ease 0.6s both",
             }}
@@ -216,7 +223,7 @@ export default function LandingPage() {
               marginTop: 10,
               fontSize: 13,
               letterSpacing: "0.06em",
-              color: "#5b6b7a",
+              color: INK_FAINT,
               maxWidth: 540,
               animation: "saguk-rise 1s ease 0.75s both",
             }}
@@ -237,8 +244,8 @@ export default function LandingPage() {
             <a
               href="#divisioni"
               style={{
-                background: "linear-gradient(180deg,#e9edf0,#9aa2a8)",
-                color: "#0a0e17",
+                background: INK,
+                color: BG,
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: "0.1em",
@@ -252,8 +259,8 @@ export default function LandingPage() {
             <Link
               href="/login"
               style={{
-                border: "1px solid #2c3e54",
-                color: "#aeb9c6",
+                border: "1px solid #cdc8bb",
+                color: INK_SOFT,
                 fontWeight: 700,
                 fontSize: 12,
                 letterSpacing: "0.1em",
@@ -270,7 +277,7 @@ export default function LandingPage() {
               position: "absolute",
               bottom: 28,
               fontSize: 20,
-              color: "#33485f",
+              color: "#bdbfc3",
               animation: "saguk-rise 1s ease 1.2s both",
             }}
           >
@@ -285,7 +292,7 @@ export default function LandingPage() {
               style={{
                 fontSize: 11,
                 letterSpacing: "0.3em",
-                color: "#5b6b7a",
+                color: INK_FAINT,
                 marginBottom: 28,
               }}
             >
@@ -296,13 +303,13 @@ export default function LandingPage() {
                 fontSize: "clamp(20px, 3vw, 32px)",
                 lineHeight: 1.5,
                 fontWeight: 500,
-                color: "#cdd6e0",
+                color: "#3c3f44",
               }}
             >
               Il Gruppo Sagripanti riunisce imprese che costruiscono, pubblicano e
               accolgono. Realtà diverse — software, magazine, caffè, servizi
               assicurativi — tenute insieme da{" "}
-              <span className="metal-text" style={{ fontWeight: 800 }}>
+              <span className="metal-ink" style={{ fontWeight: 800 }}>
                 un solo modo di lavorare
               </span>
               : cura, ambizione, e zero scorciatoie.
@@ -329,12 +336,12 @@ export default function LandingPage() {
                   fontSize: "clamp(26px, 4vw, 44px)",
                   fontWeight: 800,
                   margin: 0,
-                  color: "#e8edf2",
+                  color: INK,
                 }}
               >
                 Le divisioni
               </h2>
-              <span style={{ color: "#5b6b7a", fontSize: 13 }}>
+              <span style={{ color: INK_FAINT, fontSize: 13 }}>
                 — quattro anime, una sola visione
               </span>
             </div>
@@ -348,7 +355,7 @@ export default function LandingPage() {
           >
             {DIVISIONS.map((d, i) => (
               <Reveal key={d.name} delay={i * 110}>
-                <div className="div-card" style={{ height: "100%" }}>
+                <div className="div-card-light" style={{ height: "100%" }}>
                   <div
                     style={{
                       display: "flex",
@@ -358,7 +365,7 @@ export default function LandingPage() {
                     }}
                   >
                     <span
-                      className="metal-text wordmark"
+                      className="metal-ink wordmark"
                       style={{ fontSize: 30 }}
                     >
                       {d.n}
@@ -367,7 +374,7 @@ export default function LandingPage() {
                       style={{
                         fontSize: 10,
                         letterSpacing: "0.12em",
-                        color: "#5b6b7a",
+                        color: INK_FAINT,
                         textAlign: "right",
                         maxWidth: 150,
                       }}
@@ -379,13 +386,13 @@ export default function LandingPage() {
                     style={{
                       fontSize: 24,
                       fontWeight: 800,
-                      color: "#f0f4f8",
+                      color: INK,
                       marginBottom: 10,
                     }}
                   >
                     {d.name}
                   </div>
-                  <p style={{ color: "#8b97a6", fontSize: 13, lineHeight: 1.6 }}>
+                  <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6 }}>
                     {d.desc}
                   </p>
                   {d.href && (
@@ -393,7 +400,7 @@ export default function LandingPage() {
                       href={d.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="saguk-link"
+                      className="saguk-link-ink"
                       style={{
                         display: "inline-block",
                         marginTop: 16,
@@ -419,7 +426,7 @@ export default function LandingPage() {
                           href={s.u}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="saguk-link"
+                          className="saguk-link-ink"
                           style={{ fontSize: 12, fontWeight: 600 }}
                         >
                           {s.t} →
@@ -450,9 +457,9 @@ export default function LandingPage() {
                   aspectRatio: "4 / 5",
                   borderRadius: 8,
                   overflow: "hidden",
-                  border: "1px solid #1e2d40",
+                  border: `1px solid ${HAIR}`,
                   background:
-                    "linear-gradient(160deg,#10192a,#0a111c)",
+                    "linear-gradient(160deg,#ece8df,#f4f1ea)",
                 }}
               >
                 {photoOk ? (
@@ -476,7 +483,7 @@ export default function LandingPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#33485f",
+                      color: "#b0aa9c",
                       fontSize: 11,
                       letterSpacing: "0.16em",
                       textAlign: "center",
@@ -494,7 +501,7 @@ export default function LandingPage() {
                   style={{
                     fontSize: 11,
                     letterSpacing: "0.3em",
-                    color: "#5b6b7a",
+                    color: INK_FAINT,
                     marginBottom: 18,
                   }}
                 >
@@ -505,14 +512,14 @@ export default function LandingPage() {
                     fontSize: "clamp(26px, 3.6vw, 40px)",
                     fontWeight: 800,
                     margin: 0,
-                    color: "#eef2f6",
+                    color: INK,
                   }}
                 >
                   Fabrizio Sagripanti
                 </h2>
                 <div
                   style={{
-                    color: "#00d4ff",
+                    color: INK_SOFT,
                     fontSize: 12,
                     letterSpacing: "0.12em",
                     marginTop: 8,
@@ -523,7 +530,7 @@ export default function LandingPage() {
                 </div>
                 <p
                   style={{
-                    color: "#9aa6b4",
+                    color: INK_SOFT,
                     fontSize: 16,
                     lineHeight: 1.75,
                     marginTop: 22,
@@ -545,7 +552,7 @@ export default function LandingPage() {
                 style={{
                   fontSize: 11,
                   letterSpacing: "0.3em",
-                  color: "#5b6b7a",
+                  color: INK_FAINT,
                   marginBottom: 32,
                 }}
               >
@@ -560,7 +567,7 @@ export default function LandingPage() {
                     className="wordmark"
                     style={{
                       fontSize: 13,
-                      color: "#7c8a99",
+                      color: INK_FAINT,
                       paddingTop: 1,
                       letterSpacing: "0.01em",
                     }}
@@ -569,7 +576,7 @@ export default function LandingPage() {
                   </div>
                   <div
                     style={{
-                      borderLeft: "1px solid #1e2d40",
+                      borderLeft: `1px solid ${HAIR}`,
                       paddingLeft: 26,
                       paddingBottom: i === TAPPE.length - 1 ? 0 : 34,
                       position: "relative",
@@ -583,21 +590,21 @@ export default function LandingPage() {
                         width: 9,
                         height: 9,
                         borderRadius: "50%",
-                        background: "linear-gradient(180deg,#e9edf0,#79828a)",
+                        background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
                       }}
                     />
                     <div
                       style={{
                         fontSize: 16,
                         fontWeight: 700,
-                        color: "#eef2f6",
+                        color: INK,
                         marginBottom: 7,
                       }}
                     >
                       {t.titolo}
                     </div>
                     <div
-                      style={{ color: "#8b97a6", fontSize: 14, lineHeight: 1.65 }}
+                      style={{ color: INK_SOFT, fontSize: 14, lineHeight: 1.65 }}
                     >
                       {t.testo}
                     </div>
@@ -613,7 +620,7 @@ export default function LandingPage() {
               style={{
                 maxWidth: 760,
                 marginTop: 56,
-                borderTop: "1px solid #16202f",
+                borderTop: `1px solid ${HAIR}`,
                 paddingTop: 44,
                 display: "flex",
                 flexDirection: "column",
@@ -624,12 +631,12 @@ export default function LandingPage() {
                 style={{
                   fontSize: 11,
                   letterSpacing: "0.3em",
-                  color: "#5b6b7a",
+                  color: INK_FAINT,
                 }}
               >
                 IL METODO
               </div>
-              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
+              <p style={{ color: INK_SOFT, fontSize: 16, lineHeight: 1.8 }}>
                 Il mio mestiere non è scrivere il codice riga per riga: è
                 decidere <em>cosa</em> costruire e <em>perché</em>, dirigere
                 l&apos;architettura e il prodotto, riconoscere quando una
@@ -637,18 +644,18 @@ export default function LandingPage() {
                 l&apos;intelligenza artificiale come leva — come un direttore di
                 produzione non monta personalmente la pellicola.
               </p>
-              <p style={{ color: "#9aa6b4", fontSize: 16, lineHeight: 1.8 }}>
+              <p style={{ color: INK_SOFT, fontSize: 16, lineHeight: 1.8 }}>
                 È una scelta di metodo, non una scorciatoia: oggi permette a una
                 sola persona di mandare avanti un portfolio di prodotti veri —
                 da KONTRO, gestionale SaaS con pagamenti e multi-utente, alle
                 testate editoriali — che fino a pochi anni fa avrebbe richiesto
                 una squadra intera. Un principio tiene insieme tutto quanto:{" "}
-                <span className="metal-text" style={{ fontWeight: 700 }}>
+                <span className="metal-ink" style={{ fontWeight: 700 }}>
                   se non è sensibilmente migliore di quello che si otterrebbe
                   con poco sforzo, non è pronto.
                 </span>
               </p>
-              <p style={{ color: "#5b6b7a", fontSize: 13, marginTop: 4 }}>
+              <p style={{ color: INK_FAINT, fontSize: 13, marginTop: 4 }}>
                 Sposato con Maria Teresa, padre di Alessia e Giulia.
               </p>
             </div>
@@ -658,7 +665,7 @@ export default function LandingPage() {
         {/* FOOTER */}
         <footer
           style={{
-            borderTop: "1px solid #16202f",
+            borderTop: `1px solid ${HAIR}`,
             padding: "48px 24px",
             display: "flex",
             flexWrap: "wrap",
@@ -671,18 +678,18 @@ export default function LandingPage() {
         >
           <div>
             <div
-              className="metal-text wordmark"
+              className="metal-ink wordmark"
               style={{ fontSize: 14, letterSpacing: "0.06em" }}
             >
               GRUPPO SAGRIPANTI
             </div>
-            <div style={{ color: "#475569", fontSize: 11, marginTop: 6 }}>
+            <div style={{ color: INK_FAINT, fontSize: 11, marginTop: 6 }}>
               Trade Consulting Italia S.r.l.s. · © {new Date().getFullYear()}
             </div>
           </div>
           <Link
             href="/login"
-            className="saguk-link"
+            className="saguk-link-ink"
             style={{ fontSize: 12, fontWeight: 600 }}
           >
             Accedi al Trading Terminal →

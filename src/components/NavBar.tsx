@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const links = [
+const baseLinks = [
   { href: "/terminal", label: "DASHBOARD" },
   { href: "/chart/AAPL", label: "GRAFICO" },
   { href: "/portfolio", label: "PORTAFOGLIO" },
@@ -13,12 +13,24 @@ const links = [
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((u) => setIsAdmin(!!u?.isAdmin))
+      .catch(() => {});
+  }, []);
 
   const logout = async () => {
     await fetch("/api/auth", { method: "DELETE" });
     router.push("/");
     router.refresh();
   };
+
+  const links = isAdmin
+    ? [...baseLinks, { href: "/admin", label: "ADMIN" }]
+    : baseLinks;
 
   return (
     <nav style={{

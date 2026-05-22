@@ -8,10 +8,24 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id           Int         @id @default(autoincrement())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  isAdmin      Boolean     @default(false)
+  active       Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  portfolio    Portfolio?
+  bots         BotConfig[]
+}
+
 model Portfolio {
   id        Int        @id @default(autoincrement())
   cash      Float      @default(100000)
   createdAt DateTime   @default(now())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   positions Position[]
   trades    Trade[]
 }
@@ -22,7 +36,7 @@ model Position {
   quantity    Float
   avgPrice    Float
   portfolioId Int
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 
   @@unique([portfolioId, symbol])
 }
@@ -39,7 +53,7 @@ model Trade {
   botName     String?
   createdAt   DateTime  @default(now())
   portfolioId Int
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }
 
 model BotConfig {
@@ -53,7 +67,11 @@ model BotConfig {
   lastSignal String?   // ultimo segnale agito: BUY | SELL | HOLD
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  userId     Int
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   runs       BotRun[]
+
+  @@index([userId])
 }
 
 model BotRun {

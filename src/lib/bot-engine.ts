@@ -130,8 +130,11 @@ export async function runBot(botId: number): Promise<RunResult> {
     return record("HOLD", signal.reason, signal.reason);
   }
 
-  let portfolio = await prisma.portfolio.findFirst();
-  if (!portfolio) portfolio = await prisma.portfolio.create({ data: {} });
+  // il bot opera sul portafoglio del suo proprietario
+  let portfolio = await prisma.portfolio.findFirst({ where: { userId: bot.userId } });
+  if (!portfolio) {
+    portfolio = await prisma.portfolio.create({ data: { userId: bot.userId } });
+  }
 
   let price: number;
   try {

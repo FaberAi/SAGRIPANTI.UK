@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { verifySession, SESSION_COOKIE } from "@/lib/session";
 
-// Rotte del terminale di trading: accessibili solo dopo il login.
-const PROTECTED = ["/terminal", "/portfolio", "/bots", "/chart"];
+// Rotte riservate: accessibili solo dopo il login.
+const PROTECTED = ["/terminal", "/portfolio", "/bots", "/chart", "/admin"];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = process.env.AUTH_TOKEN;
-  // fail-closed: senza AUTH_TOKEN configurato nessuno è autenticato.
-  const authed = !!token && req.cookies.get("saguk_auth")?.value === token;
+  const userId = await verifySession(req.cookies.get(SESSION_COOKIE)?.value);
+  const authed = userId !== null;
 
   // Pagine protette → redirect al login.
   if (PROTECTED.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
@@ -39,6 +39,7 @@ export const config = {
     "/portfolio/:path*",
     "/bots/:path*",
     "/chart/:path*",
+    "/admin/:path*",
     "/api/:path*",
   ],
 };

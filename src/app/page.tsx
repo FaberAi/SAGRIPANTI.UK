@@ -543,10 +543,10 @@ export default function LandingPage() {
                       y: 0,
                       opacity: 1,
                       rotateX: 0,
+                      transformPerspective: 800,
                       transition: {
                         duration: 0.8,
                         ease: [0.2, 0.7, 0.2, 1],
-                        transformPerspective: 800,
                       },
                     },
                   }}

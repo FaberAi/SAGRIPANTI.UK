@@ -516,22 +516,19 @@ export default function LandingPage() {
               }}
             >
               {"SAGRIPANTI".split("").map((char, index) => (
+                /* Due layer separati di proposito:
+                   - lo span ESTERNO anima (transform/opacity) — NIENTE clip;
+                   - lo span INTERNO porta il gradiente acciaio (metal-ink,
+                     background-clip:text) — NIENTE transform.
+                   Tenerli insieme rompe `background-clip:text` su Chrome/Firefox
+                   (un elemento con clip + transform 3D/will-change viene promosso
+                   a layer GPU e perde la maschera → lettera trasparente: si vedeva
+                   solo su Safari). Inoltre il gradiente interno viene rasterizzato
+                   una volta sola e poi solo composito → niente repaint per-frame,
+                   quindi fluido. */
                 <motion.span
                   key={index}
-                  className="metal-ink"
-                  /* Meccanismo originale (delay per-lettera) che funziona su
-                     desktop. Il gradiente metallico (-webkit-background-clip:text)
-                     è applicato per-lettera anziché sull'intera <h1>: così ogni
-                     lettera è un layer autonomo e animarla non forza il repaint
-                     dell'intera parola. Su iOS Safari questo elimina il clump per
-                     cui le lettere comparivano a blocchi (4 alla volta) invece che
-                     una a una. willChange + backfaceVisibility isolano il layer. */
-                  style={{
-                    display: "inline-block",
-                    willChange: "transform, opacity",
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden",
-                  }}
+                  style={{ display: "inline-block" }}
                   variants={{
                     hidden: { y: "110%", opacity: 0, rotateX: -90 },
                     visible: { y: 0, opacity: 1, rotateX: 0 },
@@ -542,7 +539,9 @@ export default function LandingPage() {
                     ease: [0.2, 0.7, 0.2, 1],
                   }}
                 >
-                  {char}
+                  <span className="metal-ink" style={{ display: "inline-block" }}>
+                    {char}
+                  </span>
                 </motion.span>
               ))}
             </motion.h1>

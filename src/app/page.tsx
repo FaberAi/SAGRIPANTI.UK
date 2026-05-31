@@ -505,16 +505,6 @@ export default function LandingPage() {
               className="metal-ink wordmark"
               initial="hidden"
               animate="visible"
-              /* Stagger orchestrato dal parent: una sola timeline, scheduling
-                 deterministico delle lettere. Più robusto su mobile dei tween
-                 indipendenti per-lettera (che, sotto jank del main-thread,
-                 partono a gruppi appena un frame lungo fa "scadere" più delay). */
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: { delayChildren: INTRO, staggerChildren: 0.13 },
-                },
-              }}
               style={{
                 fontSize: "clamp(32px, 8vw, 122px)",
                 letterSpacing: "0.01em",
@@ -528,9 +518,10 @@ export default function LandingPage() {
               {"SAGRIPANTI".split("").map((char, index) => (
                 <motion.span
                   key={index}
-                  /* Ogni lettera su un proprio layer di composizione: su iOS
-                     Safari evita la ri-rasterizzazione "a blocchi" del testo con
-                     -webkit-background-clip:text mentre i transform animano. */
+                  /* Meccanismo originale (delay per-lettera) che funziona su
+                     desktop. Unica aggiunta: ogni lettera su un proprio layer di
+                     composizione (willChange + backfaceVisibility), per ridurre
+                     su iOS Safari il clump del testo -webkit-background-clip:text. */
                   style={{
                     display: "inline-block",
                     willChange: "transform, opacity",
@@ -539,16 +530,12 @@ export default function LandingPage() {
                   }}
                   variants={{
                     hidden: { y: "110%", opacity: 0, rotateX: -90 },
-                    visible: {
-                      y: 0,
-                      opacity: 1,
-                      rotateX: 0,
-                      transformPerspective: 800,
-                      transition: {
-                        duration: 0.8,
-                        ease: [0.2, 0.7, 0.2, 1],
-                      },
-                    },
+                    visible: { y: 0, opacity: 1, rotateX: 0 },
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    delay: INTRO + index * 0.13,
+                    ease: [0.2, 0.7, 0.2, 1],
                   }}
                 >
                   {char}

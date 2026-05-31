@@ -502,7 +502,7 @@ export default function LandingPage() {
               G R U P P O &nbsp;·&nbsp; EST. 2026
             </motion.div>
             <motion.h1
-              className="metal-ink wordmark"
+              className="wordmark"
               initial="hidden"
               animate="visible"
               style={{
@@ -518,10 +518,14 @@ export default function LandingPage() {
               {"SAGRIPANTI".split("").map((char, index) => (
                 <motion.span
                   key={index}
+                  className="metal-ink"
                   /* Meccanismo originale (delay per-lettera) che funziona su
-                     desktop. Unica aggiunta: ogni lettera su un proprio layer di
-                     composizione (willChange + backfaceVisibility), per ridurre
-                     su iOS Safari il clump del testo -webkit-background-clip:text. */
+                     desktop. Il gradiente metallico (-webkit-background-clip:text)
+                     è applicato per-lettera anziché sull'intera <h1>: così ogni
+                     lettera è un layer autonomo e animarla non forza il repaint
+                     dell'intera parola. Su iOS Safari questo elimina il clump per
+                     cui le lettere comparivano a blocchi (4 alla volta) invece che
+                     una a una. willChange + backfaceVisibility isolano il layer. */
                   style={{
                     display: "inline-block",
                     willChange: "transform, opacity",

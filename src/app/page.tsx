@@ -502,7 +502,7 @@ export default function LandingPage() {
               G R U P P O &nbsp;·&nbsp; EST. 2026
             </motion.div>
             <motion.h1
-              className="metal-ink wordmark"
+              className="wordmark"
               initial="hidden"
               animate="visible"
               style={{
@@ -518,10 +518,12 @@ export default function LandingPage() {
               {"SAGRIPANTI".split("").map((char, index) => (
                 <motion.span
                   key={index}
-                  /* Meccanismo originale (delay per-lettera) che funziona su
-                     desktop. Unica aggiunta: ogni lettera su un proprio layer di
-                     composizione (willChange + backfaceVisibility), per ridurre
-                     su iOS Safari il clump del testo -webkit-background-clip:text. */
+                  /* Il gradiente "acciaio" (background-clip:text) va su OGNI
+                     lettera, non sull'<h1>: il background non si eredita e ogni
+                     span — promossa a layer proprio da rotateX/willChange — senza
+                     la classe resterebbe color:transparent, quindi invisibile.
+                     Per-lettera il gradiente (quasi verticale) resta identico. */
+                  className="metal-ink"
                   style={{
                     display: "inline-block",
                     willChange: "transform, opacity",

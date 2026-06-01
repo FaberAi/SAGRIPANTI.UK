@@ -52,9 +52,14 @@ export default function IntroSplash() {
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const W = window.innerWidth;
       const H = window.innerHeight;
+      // Su mobile lo splash è il punto critico per il jank. Alleggeriamo il
+      // carico di rendering per-frame SENZA toccare la timeline (così resta
+      // sincronizzato con l'ingresso della hero, INTRO in page.tsx): backing
+      // store più piccolo, meno particelle, meno colonne di pioggia.
+      const mobile = W < 768;
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       ctx.scale(dpr, dpr);
@@ -68,7 +73,7 @@ export default function IntroSplash() {
       const steelStart = T_RAIN + T_FORM;
 
       // --- pioggia Matrix ---
-      const cell = 16;
+      const cell = mobile ? 22 : 16;
       const cols = Math.ceil(W / cell);
       const drops = Array.from({ length: cols }, () => Math.random() * -H);
 
@@ -94,7 +99,7 @@ export default function IntroSplash() {
         octx.textBaseline = "middle";
         octx.fillText(word, cx, cy);
         const data = octx.getImageData(0, 0, W, H).data;
-        const gap = W < 520 ? 7 : 9;
+        const gap = mobile ? 11 : 9;
         for (let y = 0; y < H; y += gap) {
           for (let x = 0; x < W; x += gap) {
             if (data[(y * W + x) * 4 + 3] > 130) {

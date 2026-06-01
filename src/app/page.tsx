@@ -561,49 +561,30 @@ export default function LandingPage() {
                 justifyContent: "center",
               }}
             >
+            {/* La parola INTERA "SAGRIPANTI" entra dal centro dello schermo
+               (scale dal centro + fade), non più lettera-per-lettera. Lo scale
+               sta sul contenitore <h1>; il gradiente acciaio sta sullo span
+               interno SENZA transform, così background-clip:text non si rompe su
+               Chrome/Firefox (un elemento con clip + transform viene promosso a
+               layer GPU e perde la maschera). Più leggero del reveal a 10 lettere. */}
             <motion.h1
               className="wordmark"
-              initial="hidden"
-              animate="visible"
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 1.0, delay: INTRO + 0.12, ease: [0.16, 1, 0.3, 1] }}
               style={{
                 fontSize: "clamp(32px, 8vw, 122px)",
                 letterSpacing: "0.01em",
                 lineHeight: 1,
                 margin: 0,
                 maxWidth: "100%",
-                display: "flex",
-                overflow: "hidden",
+                display: "inline-block",
+                willChange: "transform, opacity",
               }}
             >
-              {"SAGRIPANTI".split("").map((char, index) => (
-                /* Due layer separati di proposito:
-                   - lo span ESTERNO anima (transform/opacity) — NIENTE clip;
-                   - lo span INTERNO porta il gradiente acciaio (metal-ink,
-                     background-clip:text) — NIENTE transform.
-                   Tenerli insieme rompe `background-clip:text` su Chrome/Firefox
-                   (un elemento con clip + transform 3D/will-change viene promosso
-                   a layer GPU e perde la maschera → lettera trasparente: si vedeva
-                   solo su Safari). Inoltre il gradiente interno viene rasterizzato
-                   una volta sola e poi solo composito → niente repaint per-frame,
-                   quindi fluido. */
-                <motion.span
-                  key={index}
-                  style={{ display: "inline-block" }}
-                  variants={{
-                    hidden: { y: "110%", opacity: 0, rotateX: -90 },
-                    visible: { y: 0, opacity: 1, rotateX: 0 },
-                  }}
-                  transition={{
-                    duration: 0.8,
-                    delay: INTRO + index * 0.13,
-                    ease: [0.2, 0.7, 0.2, 1],
-                  }}
-                >
-                  <span className="metal-ink" style={{ display: "inline-block" }}>
-                    {char}
-                  </span>
-                </motion.span>
-              ))}
+              <span className="metal-ink" style={{ display: "inline-block" }}>
+                SAGRIPANTI
+              </span>
             </motion.h1>
 
             {/* riflesso a specchio sotto la scritta — assoluto, non altera il

@@ -626,9 +626,9 @@ export default function LandingPage() {
                 transform: "scaleY(-1)",
                 pointerEvents: "none",
                 WebkitMaskImage:
-                  "linear-gradient(to bottom, transparent 32%, rgba(0,0,0,0.5) 100%)",
+                  "linear-gradient(to bottom, transparent 52%, rgba(0,0,0,0.5) 100%)",
                 maskImage:
-                  "linear-gradient(to bottom, transparent 32%, rgba(0,0,0,0.5) 100%)",
+                  "linear-gradient(to bottom, transparent 52%, rgba(0,0,0,0.5) 100%)",
               }}
             >
               <span
@@ -649,7 +649,7 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: INTRO + 1.5 }}
               style={{
-                marginTop: 30,
+                marginTop: 58,
                 fontSize: "clamp(15px, 2.2vw, 22px)",
                 color: "#3c3f44",
                 fontWeight: 500,

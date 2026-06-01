@@ -339,3 +339,12 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   .saguk-blob { animation: none !important; }
   .saguk-circuit { animation: none !important; opacity: 0.085; }
 }
+
+/* Mobile: fermiamo le animazioni continue di sfondo (blob con blur(80px) e
+   respiro del circuito). Su mobile il blur ri-rasterizzato a ogni frame e il
+   repaint dell'SVG erano la causa principale del jank durante l'intro/hero.
+   Restano statici (rasterizzati una volta) = niente costo per-frame. */
+@media (max-width: 767px) {
+  .saguk-blob { animation: none !important; will-change: auto; }
+  .saguk-circuit { animation: none !important; opacity: 0.085; }
+}

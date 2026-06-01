@@ -99,7 +99,7 @@ export default function IntroSplash() {
         octx.textBaseline = "middle";
         octx.fillText(word, cx, cy);
         const data = octx.getImageData(0, 0, W, H).data;
-        const gap = mobile ? 11 : 9;
+        const gap = mobile ? 13 : 9;
         for (let y = 0; y < H; y += gap) {
           for (let x = 0; x < W; x += gap) {
             if (data[(y * W + x) * 4 + 3] > 130) {
@@ -139,7 +139,7 @@ export default function IntroSplash() {
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(0,0,0,0.18)";
         ctx.strokeText(word, cx, cy);
-        if (shine > 0 && shine < 1) {
+        if (!mobile && shine > 0 && shine < 1) {
           ctx.globalCompositeOperation = "source-atop";
           const bx = -W * 0.4 + shine * W * 1.8;
           const sg = ctx.createLinearGradient(bx, 0, bx + W * 0.34, 0);
@@ -196,12 +196,18 @@ export default function IntroSplash() {
             const e = easeOut(local);
             const x = p.sx + (p.tx - p.sx) * e;
             const y = p.sy + (p.ty - p.sy) * e;
-            if (flip && local < 1) p.char = pick();
             const set = local >= 1;
             const a = (set ? 1 : 0.45 + 0.55 * local) * (1 - steelA);
             // glifo a posto = nero pieno; ancora in volo = grigio scuro
             ctx.fillStyle = set ? `rgba(18,19,22,${a})` : `rgba(58,61,66,${a})`;
-            ctx.fillText(p.char, x, y);
+            if (mobile) {
+              // su mobile niente fillText (costoso, centinaia di chiamate/frame):
+              // a queste dimensioni un quadratino rende uguale ed è ~10x più leggero
+              ctx.fillRect(x - 1.4, y - 1.4, 2.8, 2.8);
+            } else {
+              if (flip && local < 1) p.char = pick();
+              ctx.fillText(p.char, x, y);
+            }
           }
         }
 

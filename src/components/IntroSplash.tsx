@@ -219,14 +219,10 @@ export default function IntroSplash() {
             const a = (set ? 1 : 0.45 + 0.55 * local) * (1 - steelA);
             // glifo a posto = nero pieno; ancora in volo = grigio scuro
             ctx.fillStyle = set ? `rgba(18,19,22,${a})` : `rgba(58,61,66,${a})`;
-            if (mobile) {
-              // su mobile niente fillText (costoso, centinaia di chiamate/frame):
-              // a queste dimensioni un quadratino rende uguale ed è ~10x più leggero
-              ctx.fillRect(x - 1.4, y - 1.4, 2.8, 2.8);
-            } else {
-              if (flip && local < 1) p.char = pick();
-              ctx.fillText(p.char, x, y);
-            }
+            // Il nome si forma coi glifi Matrix anche su mobile (non più puntini).
+            // Sostenibile grazie a 30fps + dpr 1 + gap particelle più ampio.
+            if (flip && local < 1) p.char = pick();
+            ctx.fillText(p.char, x, y);
           }
         }
 

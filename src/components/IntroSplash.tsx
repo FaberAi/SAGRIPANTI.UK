@@ -59,7 +59,7 @@ export default function IntroSplash() {
       // sincronizzato con l'ingresso della hero, INTRO in page.tsx): backing
       // store più piccolo, meno particelle, meno colonne di pioggia.
       const mobile = W < 768;
-      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1 : 2);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       ctx.scale(dpr, dpr);
@@ -154,9 +154,18 @@ export default function IntroSplash() {
 
       const startedAt = performance.now();
       let lastFlip = 0;
+      let lastDraw = 0;
 
       const frame = (now: number) => {
         const t = now - startedAt;
+
+        // Su mobile disegniamo a ~30fps invece di 60: dimezza il lavoro per
+        // secondo senza intaccare la timeline (che resta legata a `t`).
+        if (mobile && t < TOTAL && now - lastDraw < 33) {
+          raf = requestAnimationFrame(frame);
+          return;
+        }
+        lastDraw = now;
 
         if (t < steelStart) {
           // trail fade: velo di bianco sporco semi-trasparente
@@ -167,13 +176,22 @@ export default function IntroSplash() {
           for (let i = 0; i < cols; i++) {
             const x = i * cell;
             const y = drops[i];
-            // testa della goccia: quasi-nero netto
-            ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
-            ctx.fillText(pick(), x, y);
-            // scia: grigio medio che sfuma
-            ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
-            ctx.fillText(pick(), x, y - cell);
-            ctx.fillText(pick(), x, y - cell * 2);
+            if (mobile) {
+              // su mobile la pioggia è fatta di rettangoli, non di glifi
+              // (fillText è la cosa più cara): testa netta + una scia.
+              ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
+              ctx.fillRect(x, y, 3, 9);
+              ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
+              ctx.fillRect(x, y - cell, 3, 9);
+            } else {
+              // testa della goccia: quasi-nero netto
+              ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
+              ctx.fillText(pick(), x, y);
+              // scia: grigio medio che sfuma
+              ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
+              ctx.fillText(pick(), x, y - cell);
+              ctx.fillText(pick(), x, y - cell * 2);
+            }
             drops[i] = y > H + Math.random() * 240 ? Math.random() * -120 : y + cell;
           }
         } else {

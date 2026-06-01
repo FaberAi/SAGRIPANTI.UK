@@ -335,6 +335,57 @@ const HAIR = "#e4dfd4";      // linee e bordi
    altrimenti SAGRIPANTI comparirebbe lettera-per-lettera dietro lo splash. */
 const INTRO = 5.6;
 
+/* ---------- fondo "circuito" — sensazione tecnologica senza costo per-frame:
+   pattern SVG statico di tracce e nodi, molto tenue, con un respiro lento di
+   sola opacità (cheap) e una maschera radiale che lo dissolve ai bordi. ---------- */
+function CircuitBg() {
+  return (
+    <div
+      aria-hidden
+      className="saguk-circuit"
+      style={{
+        position: "absolute",
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: "none",
+        WebkitMaskImage:
+          "radial-gradient(125% 85% at 50% 36%, #000 30%, transparent 76%)",
+        maskImage:
+          "radial-gradient(125% 85% at 50% 36%, #000 30%, transparent 76%)",
+      }}
+    >
+      <svg width="100%" height="100%" style={{ display: "block" }}>
+        <defs>
+          <pattern
+            id="saguk-circuit-tile"
+            width="160"
+            height="160"
+            patternUnits="userSpaceOnUse"
+          >
+            <g fill="none" stroke="#1b1d21" strokeWidth="1.1">
+              <path d="M0 34 H44 V82 H104 V22 H160" />
+              <path d="M24 160 V112 H80 V64 H134 V0" />
+              <path d="M0 124 H34 V160" />
+              <path d="M160 102 H116 V146" />
+              <path d="M44 34 V0" />
+              <path d="M80 64 H80 M104 22 V0" />
+            </g>
+            <g fill="#1b1d21">
+              <circle cx="44" cy="82" r="3" />
+              <circle cx="104" cy="22" r="3" />
+              <circle cx="80" cy="64" r="3" />
+              <circle cx="134" cy="64" r="3" />
+              <circle cx="34" cy="124" r="3" />
+              <circle cx="116" cy="102" r="3" />
+            </g>
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#saguk-circuit-tile)" />
+      </svg>
+    </div>
+  );
+}
+
 /* ---------- pagina ---------- */
 export default function LandingPage() {
   const [photoOk, setPhotoOk] = useState(true);
@@ -452,6 +503,8 @@ export default function LandingPage() {
             position: "relative",
           }}
         >
+          <CircuitBg />
+
           {/* macchie di luce che derivano lente dietro il titolo */}
           <div
             className="saguk-blob"
@@ -501,6 +554,13 @@ export default function LandingPage() {
             >
               G R U P P O &nbsp;·&nbsp; EST. 2026
             </motion.div>
+            <div
+              style={{
+                position: "relative",
+                display: "inline-flex",
+                justifyContent: "center",
+              }}
+            >
             <motion.h1
               className="wordmark"
               initial="hidden"
@@ -545,6 +605,45 @@ export default function LandingPage() {
                 </motion.span>
               ))}
             </motion.h1>
+
+            {/* riflesso a specchio sotto la scritta — assoluto, non altera il
+                layout; il transform sta sul wrapper e il gradiente sullo span
+                interno (niente clip+transform insieme, così resta visibile su
+                Chrome/Firefox). La maschera lo dissolve allontanandosi. */}
+            <motion.div
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.1, delay: INTRO + 1.25 }}
+              style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                marginTop: 3,
+                textAlign: "center",
+                lineHeight: 1,
+                transform: "scaleY(-1)",
+                pointerEvents: "none",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, transparent 32%, rgba(0,0,0,0.5) 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, transparent 32%, rgba(0,0,0,0.5) 100%)",
+              }}
+            >
+              <span
+                className="metal-ink wordmark"
+                style={{
+                  display: "inline-block",
+                  fontSize: "clamp(32px, 8vw, 122px)",
+                  letterSpacing: "0.01em",
+                }}
+              >
+                SAGRIPANTI
+              </span>
+            </motion.div>
+            </div>
+
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

@@ -324,6 +324,18 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent);
 }
 
+/* Fondo circuito tecnologico: solo opacità che "respira" (GPU-cheap, niente
+   jank), tenue per non rompere l'eleganza da showroom. */
+@keyframes saguk-circuit-breathe {
+  0%, 100% { opacity: 0.05; }
+  50%      { opacity: 0.085; }
+}
+.saguk-circuit {
+  opacity: 0.06;
+  animation: saguk-circuit-breathe 9s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .saguk-blob { animation: none !important; }
+  .saguk-circuit { animation: none !important; opacity: 0.06; }
 }

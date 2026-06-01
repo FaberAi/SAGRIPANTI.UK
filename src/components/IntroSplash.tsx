@@ -177,12 +177,13 @@ export default function IntroSplash() {
             const x = i * cell;
             const y = drops[i];
             if (mobile) {
-              // su mobile la pioggia è fatta di rettangoli, non di glifi
-              // (fillText è la cosa più cara): testa netta + una scia.
+              // su mobile teniamo i glifi Matrix (i "numeri"), ma più leggeri:
+              // testa + una sola scia (il desktop ne ha due). Il grosso del
+              // costo è già tagliato da 30fps + dpr 1.
               ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
-              ctx.fillRect(x, y, 3, 9);
+              ctx.fillText(pick(), x, y);
               ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
-              ctx.fillRect(x, y - cell, 3, 9);
+              ctx.fillText(pick(), x, y - cell);
             } else {
               // testa della goccia: quasi-nero netto
               ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;

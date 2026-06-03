@@ -8,6 +8,8 @@ import {
   useScroll,
   useTransform,
   useSpring,
+  useInView,
+  animate,
 } from "framer-motion";
 import IntroSplash from "@/components/IntroSplash";
 
@@ -70,6 +72,31 @@ function Magnetic({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ---------- helper: contatore che si anima quando entra in vista ---------- */
+function CountUp({
+  to,
+  duration = 1.7,
+}: {
+  to: number;
+  duration?: number;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-12% 0px" });
+  const [val, setVal] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    const controls = animate(0, to, {
+      duration,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => setVal(v),
+    });
+    return () => controls.stop();
+  }, [inView, to, duration]);
+
+  return <span ref={ref}>{Math.round(val)}</span>;
+}
+
 /* ---------- nastro scorrevole dei marchi del Gruppo ---------- */
 const MARQUEE = [
   "FaberAi",
@@ -123,27 +150,44 @@ function Marquee() {
   );
 }
 
-/* ---------- Componente Division Card con effetto Glow ---------- */
+/* ---------- Componente Division Card: spotlight + tilt 3D ---------- */
 function DivisionCard({ d, i }: { d: Division; i: number }) {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
+  // Tilt 3D: il puntatore inclina la card (range ±6°), con molla per
+  // ammorbidire e ritorno fluido all'uscita.
+  const rx = useSpring(useMotionValue(0), { stiffness: 220, damping: 18 });
+  const ry = useSpring(useMotionValue(0), { stiffness: 220, damping: 18 });
+
+  function onMouseMove(e: React.MouseEvent) {
+    const { left, top, width, height } =
+      e.currentTarget.getBoundingClientRect();
+    const px = e.clientX - left;
+    const py = e.clientY - top;
+    mouseX.set(px);
+    mouseY.set(py);
+    ry.set(((px / width) - 0.5) * 12); // sinistra/destra
+    rx.set((0.5 - py / height) * 12); // su/giù
+  }
+  function onLeave() {
+    rx.set(0);
+    ry.set(0);
   }
 
   return (
-    <Reveal delay={i * 110}>
+    <Reveal delay={i * 110} style={{ height: "100%", perspective: 900 }}>
       <motion.div
-        className="div-card-light"
+        className="div-card-light saguk-tilt"
         onMouseMove={onMouseMove}
+        onMouseLeave={onLeave}
         style={{
           height: "100%",
           position: "relative",
           overflow: "hidden",
           background: BG,
+          rotateX: rx,
+          rotateY: ry,
         }}
       >
         {/* Spotlight Effect */}
@@ -155,7 +199,7 @@ function DivisionCard({ d, i }: { d: Division; i: number }) {
             background: useMotionTemplate`
               radial-gradient(
                 350px circle at ${mouseX}px ${mouseY}px,
-                rgba(27, 29, 33, 0.04),
+                rgba(27, 29, 33, 0.05),
                 transparent 80%
               )
             `,
@@ -291,6 +335,14 @@ const DIVISIONS: Division[] = [
   },
 ];
 
+/* Numeri del Gruppo — animati allo scroll. */
+const STATS: { n: number; label: string; suffix?: string }[] = [
+  { n: 4, label: "Divisioni" },
+  { n: 8, label: "Marchi" },
+  { n: 3, label: "Testate editoriali" },
+  { n: 2, label: "Caffè a Bracciano" },
+];
+
 const TAPPE: { anno: string; titolo: string; testo: string }[] = [
   {
     anno: "1966",
@@ -331,9 +383,42 @@ const INK_SOFT = "#565a61";  // testo secondario
 const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
 const HAIR = "#e4dfd4";      // linee e bordi
 
+/* palette terminale (dark) — coerente col Trading Terminal interno */
+const TERM_BG = "#0a0e17";
+const TERM_PANEL = "#0e1626";
+const TERM_BORDER = "#1e2d40";
+const CYAN = "#00d4ff";
+const TGREEN = "#00ff88";
+const TRED = "#ff4466";
+
 /* Le animazioni one-shot della hero partono dopo l'IntroSplash (~5,6s):
    altrimenti SAGRIPANTI comparirebbe lettera-per-lettera dietro lo splash. */
 const INTRO = 5.6;
+
+/* ---------- sparkline "live" del terminale — deterministica (niente random,
+   così non rompe l'idratazione SSR): un profilo che tende al rialzo, ripetuto
+   due volte e fatto scorrere a sinistra per dare il senso del tempo reale. ---------- */
+const SPARK_VALS = [
+  34, 40, 36, 45, 41, 49, 46, 54, 50, 47, 55, 60, 56, 63, 59, 67, 71, 66, 73,
+  69, 77, 74, 80, 85,
+];
+const SPARK_STEP = 26;
+const SPARK_W = (SPARK_VALS.length - 1) * SPARK_STEP; // larghezza di un ciclo
+const SPARK_H = 100;
+function sparkPoints(vals: number[]) {
+  return vals
+    .map((v, i) => `${i * SPARK_STEP},${(SPARK_H - (v / 100) * SPARK_H).toFixed(1)}`)
+    .join(" ");
+}
+const SPARK_LINE = sparkPoints(SPARK_VALS);
+const SPARK_AREA = `0,${SPARK_H} ${SPARK_LINE} ${SPARK_W},${SPARK_H}`;
+
+/* chip "ticker" del pannello — stilizzati, è un'anteprima del terminale */
+const TICKERS: { sym: string; val: string; chg: string; up: boolean }[] = [
+  { sym: "FABER", val: "128.40", chg: "+2.4%", up: true },
+  { sym: "GRP·INDEX", val: "1 042", chg: "+1.1%", up: true },
+  { sym: "VOL", val: "3.7M", chg: "-0.6%", up: false },
+];
 
 /* ---------- fondo "circuito" — sensazione tecnologica senza costo per-frame:
    pattern SVG statico di tracce e nodi, molto tenue, con un respiro lento di
@@ -386,6 +471,260 @@ function CircuitBg() {
   );
 }
 
+/* ---------- Banda "I numeri del Gruppo" — contatori animati ---------- */
+function StatsBand() {
+  return (
+    <section style={{ padding: "0 24px", maxWidth: 1140, margin: "70px auto 0" }}>
+      <Reveal>
+        <div className="saguk-stats">
+          {STATS.map((s) => (
+            <div key={s.label} className="saguk-stat">
+              <div
+                className="metal-ink wordmark"
+                style={{ fontSize: "clamp(34px, 5vw, 56px)", lineHeight: 1 }}
+              >
+                <CountUp to={s.n} />
+                {s.suffix ?? ""}
+              </div>
+              <div
+                style={{
+                  marginTop: 12,
+                  fontSize: 11,
+                  letterSpacing: "0.16em",
+                  textTransform: "uppercase",
+                  color: INK_FAINT,
+                }}
+              >
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/* ---------- Sezione "Trading Terminal" — pannello dark, colpo a effetto ---------- */
+function TerminalTeaser() {
+  return (
+    <section style={{ padding: "30px 24px 110px", maxWidth: 1140, margin: "0 auto" }}>
+      <Reveal>
+        <motion.div
+          className="saguk-term-panel"
+          whileHover={{ scale: 1.004 }}
+          transition={{ type: "spring", stiffness: 200, damping: 22 }}
+          style={{
+            background: TERM_BG,
+            border: `1px solid ${TERM_BORDER}`,
+            borderRadius: 16,
+            padding: "44px 40px",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          {/* alone cyan in alto a destra */}
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              top: -120,
+              right: -80,
+              width: 360,
+              height: 360,
+              borderRadius: "50%",
+              background:
+                "radial-gradient(circle, rgba(0,212,255,0.16), transparent 70%)",
+              pointerEvents: "none",
+            }}
+          />
+          <div className="saguk-term-grid" style={{ position: "relative", zIndex: 1 }}>
+            {/* colonna testo */}
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  fontSize: 11,
+                  letterSpacing: "0.22em",
+                  color: CYAN,
+                  marginBottom: 22,
+                  fontWeight: 600,
+                }}
+              >
+                <span className="saguk-live-dot" />
+                ACCESSO RISERVATO · LIVE
+              </div>
+              <h2
+                className="wordmark"
+                style={{
+                  fontSize: "clamp(28px, 4.4vw, 46px)",
+                  color: "#e8eef6",
+                  margin: 0,
+                  letterSpacing: "0.02em",
+                  lineHeight: 1.05,
+                }}
+              >
+                TRADING TERMINAL
+              </h2>
+              <p
+                style={{
+                  color: "#8aa0bd",
+                  fontSize: 15,
+                  lineHeight: 1.7,
+                  marginTop: 20,
+                  maxWidth: 420,
+                }}
+              >
+                Il motore che gira sotto al Gruppo: dati di mercato in tempo
+                reale, grafici, backtest e bot operativi. Costruito su misura,
+                riservato a chi ha le chiavi.
+              </p>
+              <Magnetic>
+                <Link
+                  href="/login"
+                  className="saguk-term-cta"
+                  style={{
+                    display: "inline-block",
+                    marginTop: 30,
+                    background: CYAN,
+                    color: TERM_BG,
+                    fontWeight: 800,
+                    fontSize: 12,
+                    letterSpacing: "0.1em",
+                    padding: "14px 28px",
+                    borderRadius: 4,
+                    textDecoration: "none",
+                  }}
+                >
+                  ENTRA NEL TERMINALE →
+                </Link>
+              </Magnetic>
+            </div>
+
+            {/* colonna grafico "live" */}
+            <div
+              style={{
+                background: TERM_PANEL,
+                border: `1px solid ${TERM_BORDER}`,
+                borderRadius: 10,
+                padding: 16,
+              }}
+            >
+              {/* intestazione finestra */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  marginBottom: 14,
+                }}
+              >
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: TRED }} />
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#f5b14c" }} />
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", background: TGREEN }} />
+                </div>
+                <span
+                  style={{
+                    fontSize: 10,
+                    letterSpacing: "0.14em",
+                    color: "#5b6b8a",
+                  }}
+                >
+                  SAGRIPANTI · TERMINAL
+                </span>
+              </div>
+
+              {/* grafico area che scorre */}
+              <div style={{ overflow: "hidden", borderRadius: 6 }}>
+                <motion.div
+                  style={{ display: "flex", width: "200%" }}
+                  animate={{ x: ["0%", "-50%"] }}
+                  transition={{ duration: 9, ease: "linear", repeat: Infinity }}
+                >
+                  {[0, 1].map((k) => (
+                    <svg
+                      key={k}
+                      viewBox={`0 0 ${SPARK_W} ${SPARK_H}`}
+                      preserveAspectRatio="none"
+                      style={{ width: "50%", height: 150, display: "block" }}
+                    >
+                      <defs>
+                        <linearGradient id={`spark-fill-${k}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor={CYAN} stopOpacity="0.32" />
+                          <stop offset="100%" stopColor={CYAN} stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      <polygon points={SPARK_AREA} fill={`url(#spark-fill-${k})`} />
+                      <polyline
+                        points={SPARK_LINE}
+                        fill="none"
+                        stroke={CYAN}
+                        strokeWidth="1.6"
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    </svg>
+                  ))}
+                </motion.div>
+              </div>
+
+              {/* riga ticker */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  marginTop: 14,
+                  flexWrap: "wrap",
+                }}
+              >
+                {TICKERS.map((t) => (
+                  <div
+                    key={t.sym}
+                    style={{
+                      flex: "1 1 0",
+                      minWidth: 92,
+                      background: TERM_BG,
+                      border: `1px solid ${TERM_BORDER}`,
+                      borderRadius: 6,
+                      padding: "9px 11px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 9,
+                        letterSpacing: "0.1em",
+                        color: "#5b6b8a",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {t.sym}
+                    </div>
+                    <div style={{ fontSize: 14, color: "#e8eef6", fontWeight: 700 }}>
+                      {t.val}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: t.up ? TGREEN : TRED,
+                        marginTop: 2,
+                      }}
+                    >
+                      {t.chg}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </Reveal>
+    </section>
+  );
+}
+
 /* ---------- pagina ---------- */
 export default function LandingPage() {
   const [photoOk, setPhotoOk] = useState(true);
@@ -407,6 +746,20 @@ export default function LandingPage() {
   });
   const heroY = useTransform(heroProgress, [0, 1], [0, 130]);
   const heroOpacity = useTransform(heroProgress, [0, 0.75], [1, 0]);
+
+  // Spotlight della hero che segue il cursore (desktop; su mobile resta fermo
+  // fuori campo, nessun costo). Mole morbida via spring.
+  const spotX = useMotionValue(-600);
+  const spotY = useMotionValue(-600);
+  const ssx = useSpring(spotX, { stiffness: 140, damping: 22 });
+  const ssy = useSpring(spotY, { stiffness: 140, damping: 22 });
+  const heroSpotlight = useMotionTemplate`radial-gradient(420px circle at ${ssx}px ${ssy}px, rgba(120,140,170,0.22), transparent 70%)`;
+
+  function onHeroMove(e: React.MouseEvent) {
+    const r = e.currentTarget.getBoundingClientRect();
+    spotX.set(e.clientX - r.left);
+    spotY.set(e.clientY - r.top);
+  }
 
   // La linea della timeline si "disegna" mentre scorri la sezione.
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -492,6 +845,7 @@ export default function LandingPage() {
         {/* HERO */}
         <section
           ref={heroRef}
+          onMouseMove={onHeroMove}
           style={{
             minHeight: "100vh",
             display: "flex",
@@ -504,6 +858,18 @@ export default function LandingPage() {
           }}
         >
           <CircuitBg />
+
+          {/* spotlight che segue il cursore */}
+          <motion.div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              zIndex: 0,
+              pointerEvents: "none",
+              background: heroSpotlight,
+            }}
+          />
 
           {/* macchie di luce che derivano lente dietro il titolo */}
           <div
@@ -725,6 +1091,9 @@ export default function LandingPage() {
 
         {/* NASTRO MARCHI */}
         <Marquee />
+
+        {/* NUMERI DEL GRUPPO */}
+        <StatsBand />
 
         {/* MANIFESTO */}
         <section style={{ padding: "100px 24px", maxWidth: 880, margin: "0 auto" }}>
@@ -1061,6 +1430,9 @@ export default function LandingPage() {
           </Reveal>
         </section>
 
+        {/* TRADING TERMINAL — colpo a effetto */}
+        <TerminalTeaser />
+
         {/* FOOTER */}
         <footer
           style={{
@@ -1081,7 +1453,7 @@ export default function LandingPage() {
                 SAGRIPANTI
               </div>
               <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6, maxWidth: 240 }}>
-                Un gruppo multidisciplinare focalizzato sulla creazione di valore attraverso tecnologia, editoria e ospitalità.
+                Tecnologia, editoria e ospitalità sotto un solo tetto. Imprese diverse, un solo modo di lavorare: fare le cose come si deve.
               </p>
             </div>
             <div>
@@ -1093,8 +1465,12 @@ export default function LandingPage() {
               </div>
             </div>
             <div>
-              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: INK, marginBottom: 20 }}>TERMINALE</div>
-              <Link href="/login" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>Trading Console</Link>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: INK, marginBottom: 20 }}>MARCHI</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <a href="https://faberai.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>FaberAi →</a>
+                <a href="https://polizzadoc.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>PolizzaDoc →</a>
+                <Link href="/login" style={{ fontSize: 13, color: INK_SOFT, textDecoration: "none" }}>Trading Terminal →</Link>
+              </div>
             </div>
           </div>
 
@@ -1108,11 +1484,13 @@ export default function LandingPage() {
             gap: 20,
           }}>
             <div style={{ color: INK_FAINT, fontSize: 11 }}>
-              Trade Consulting Italia S.r.l.s. · P.IVA IT1234567890 · © {new Date().getFullYear()}
+              {/* TODO Fabrizio: inserire la P.IVA reale al posto del placeholder rimosso. */}
+              Trade Consulting Italia S.r.l.s. · © {new Date().getFullYear()} Gruppo Sagripanti
             </div>
+            {/* TODO Fabrizio: dammi gli URL reali di LinkedIn/Instagram e li ricollego qui. */}
             <div style={{ display: "flex", gap: 24 }}>
-              <a href="#" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>LINKEDIN</a>
-              <a href="#" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>INSTAGRAM</a>
+              <a href="https://faberai.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>FABERAI.IT</a>
+              <a href="https://polizzadoc.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>POLIZZADOC.IT</a>
             </div>
           </div>
         </footer>

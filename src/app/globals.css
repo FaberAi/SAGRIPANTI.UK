@@ -340,6 +340,76 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   .saguk-circuit { animation: none !important; opacity: 0.085; }
 }
 
+/* ============ Upgrade "audace" — numeri, tilt, terminale ============ */
+
+/* Banda numeri: separatori sottili tra le colonne su desktop. */
+.saguk-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: #e4dfd4; /* la "hairline" diventa lo sfondo tra le celle */
+  border: 1px solid #e4dfd4;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.saguk-stat {
+  background: #f5f4f1;
+  padding: 34px 22px;
+  text-align: center;
+  transition: background 0.4s ease;
+}
+.saguk-stat:hover { background: #fbfaf7; }
+@media (max-width: 720px) {
+  .saguk-stats { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Card divisioni: contenitore 3D per il tilt che segue il mouse. */
+.saguk-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Pannello terminale: respiro del bagliore cyan + puntino LIVE che pulsa. */
+@keyframes saguk-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.35; transform: scale(0.7); }
+}
+.saguk-live-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 10px 1px rgba(0,255,136,0.8);
+  animation: saguk-pulse 1.4s ease-in-out infinite;
+}
+@keyframes saguk-term-glow {
+  0%, 100% { box-shadow: 0 30px 80px -40px rgba(0,212,255,0.45), 0 0 0 1px rgba(0,212,255,0.10) inset; }
+  50%      { box-shadow: 0 34px 90px -38px rgba(0,212,255,0.65), 0 0 0 1px rgba(0,212,255,0.18) inset; }
+}
+.saguk-term-panel {
+  animation: saguk-term-glow 6s ease-in-out infinite;
+}
+.saguk-term-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (max-width: 880px) {
+  .saguk-term-grid { grid-template-columns: 1fr; gap: 34px; }
+}
+
+/* CTA cyan del terminale: bagliore che si accende all'hover. */
+.saguk-term-cta {
+  transition: box-shadow 0.3s ease, transform 0.3s ease, background 0.3s ease;
+}
+.saguk-term-cta:hover {
+  box-shadow: 0 0 28px -2px rgba(0,212,255,0.7);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .saguk-term-panel { animation: none !important; }
+}
+
 /* Mobile: fermiamo le animazioni continue di sfondo (blob con blur(80px) e
    respiro del circuito). Su mobile il blur ri-rasterizzato a ogni frame e il
    repaint dell'SVG erano la causa principale del jank durante l'intro/hero.

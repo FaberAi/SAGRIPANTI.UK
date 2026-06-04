@@ -1484,8 +1484,7 @@ export default function LandingPage() {
             gap: 20,
           }}>
             <div style={{ color: INK_FAINT, fontSize: 11 }}>
-              {/* TODO Fabrizio: inserire la P.IVA reale al posto del placeholder rimosso. */}
-              Trade Consulting Italia S.r.l.s. · © {new Date().getFullYear()} Gruppo Sagripanti
+              Trade Consulting Italia S.r.l.s. · Via dei Quadri 11, 00062 Bracciano (RM) · P.IVA 17220961001 · © {new Date().getFullYear()} Gruppo Sagripanti
             </div>
             {/* TODO Fabrizio: dammi gli URL reali di LinkedIn/Instagram e li ricollego qui. */}
             <div style={{ display: "flex", gap: 24 }}>

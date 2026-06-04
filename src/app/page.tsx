@@ -1486,10 +1486,9 @@ export default function LandingPage() {
             <div style={{ color: INK_FAINT, fontSize: 11 }}>
               Trade Consulting Italia S.r.l.s. · Via dei Quadri 11, 00062 Bracciano (RM) · P.IVA 17220961001 · © {new Date().getFullYear()} Gruppo Sagripanti
             </div>
-            {/* TODO Fabrizio: dammi gli URL reali di LinkedIn/Instagram e li ricollego qui. */}
             <div style={{ display: "flex", gap: 24 }}>
-              <a href="https://faberai.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>FABERAI.IT</a>
-              <a href="https://polizzadoc.it" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>POLIZZADOC.IT</a>
+              <a href="https://www.linkedin.com/in/fabrizio-sagripanti-0400141a/" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>LINKEDIN</a>
+              <a href="https://www.instagram.com/sagripantifabrizio/" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: INK_SOFT, textDecoration: "none", fontWeight: 600 }}>INSTAGRAM</a>
             </div>
           </div>
         </footer>

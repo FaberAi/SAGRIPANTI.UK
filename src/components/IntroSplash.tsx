@@ -59,7 +59,10 @@ export default function IntroSplash() {
       // sincronizzato con l'ingresso della hero, INTRO in page.tsx): backing
       // store più piccolo, meno particelle, meno colonne di pioggia.
       const mobile = W < 768;
-      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1 : 2);
+      // Su mobile teniamo un DPR intermedio (1.5): glifi della pioggia e
+      // lettere d'acciaio molto più nitidi del passato (era 1, sgranato sui
+      // display retina) senza il costo pieno del 2x. La timeline resta intatta.
+      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
       canvas.width = W * dpr;
       canvas.height = H * dpr;
       ctx.scale(dpr, dpr);
@@ -73,7 +76,7 @@ export default function IntroSplash() {
       const steelStart = T_RAIN + T_FORM;
 
       // --- pioggia Matrix ---
-      const cell = mobile ? 22 : 16;
+      const cell = mobile ? 18 : 16;
       const cols = Math.ceil(W / cell);
       const drops = Array.from({ length: cols }, () => Math.random() * -H);
 
@@ -99,7 +102,7 @@ export default function IntroSplash() {
         octx.textBaseline = "middle";
         octx.fillText(word, cx, cy);
         const data = octx.getImageData(0, 0, W, H).data;
-        const gap = mobile ? 13 : 9;
+        const gap = mobile ? 11 : 9;
         for (let y = 0; y < H; y += gap) {
           for (let x = 0; x < W; x += gap) {
             if (data[(y * W + x) * 4 + 3] > 130) {
@@ -139,12 +142,15 @@ export default function IntroSplash() {
         ctx.lineWidth = 1;
         ctx.strokeStyle = "rgba(0,0,0,0.18)";
         ctx.strokeText(word, cx, cy);
-        if (!mobile && shine > 0 && shine < 1) {
+        if (shine > 0 && shine < 1) {
+          // Riflesso che scorre sull'acciaio. Ora anche su mobile (prima ne era
+          // escluso): è una sola fillRect a frame, costo trascurabile, e rifinisce
+          // molto il dettaglio metallico. Su mobile attenuiamo il picco di luce.
           ctx.globalCompositeOperation = "source-atop";
           const bx = -W * 0.4 + shine * W * 1.8;
           const sg = ctx.createLinearGradient(bx, 0, bx + W * 0.34, 0);
           sg.addColorStop(0, "rgba(255,255,255,0)");
-          sg.addColorStop(0.5, "rgba(255,255,255,0.85)");
+          sg.addColorStop(0.5, `rgba(255,255,255,${mobile ? 0.62 : 0.85})`);
           sg.addColorStop(1, "rgba(255,255,255,0)");
           ctx.fillStyle = sg;
           ctx.fillRect(0, cy - fs, W, fs * 2);
@@ -176,23 +182,16 @@ export default function IntroSplash() {
           for (let i = 0; i < cols; i++) {
             const x = i * cell;
             const y = drops[i];
-            if (mobile) {
-              // su mobile teniamo i glifi Matrix (i "numeri"), ma più leggeri:
-              // testa + una sola scia (il desktop ne ha due). Il grosso del
-              // costo è già tagliato da 30fps + dpr 1.
-              ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
-              ctx.fillText(pick(), x, y);
-              ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
-              ctx.fillText(pick(), x, y - cell);
-            } else {
-              // testa della goccia: quasi-nero netto
-              ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
-              ctx.fillText(pick(), x, y);
-              // scia: grigio medio che sfuma
-              ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
-              ctx.fillText(pick(), x, y - cell);
-              ctx.fillText(pick(), x, y - cell * 2);
-            }
+            // testa della goccia: quasi-nero netto
+            ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
+            ctx.fillText(pick(), x, y);
+            // scia: grigio medio che sfuma. Anche su mobile teniamo due
+            // segmenti (prima solo uno) per una pioggia più ricca e leggibile;
+            // l'aumento di costo è contenuto grazie a 30fps + cell più ampia.
+            ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
+            ctx.fillText(pick(), x, y - cell);
+            ctx.fillStyle = `rgba(96,99,105,${0.28 * rainA})`;
+            ctx.fillText(pick(), x, y - cell * 2);
             drops[i] = y > H + Math.random() * 240 ? Math.random() * -120 : y + cell;
           }
         } else {
@@ -220,7 +219,7 @@ export default function IntroSplash() {
             // glifo a posto = nero pieno; ancora in volo = grigio scuro
             ctx.fillStyle = set ? `rgba(18,19,22,${a})` : `rgba(58,61,66,${a})`;
             // Il nome si forma coi glifi Matrix anche su mobile (non più puntini).
-            // Sostenibile grazie a 30fps + dpr 1 + gap particelle più ampio.
+            // Sostenibile grazie a 30fps + dpr 1.5 + gap particelle calibrato.
             if (flip && local < 1) p.char = pick();
             ctx.fillText(p.char, x, y);
           }

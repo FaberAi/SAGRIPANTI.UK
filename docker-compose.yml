@@ -1,0 +1,80 @@
+# Stack di produzione per box.sagripanti.uk (Hetzner)
+# Servizi: Postgres + app Next.js + Caddy (HTTPS automatico) + cron giornaliero dei bot.
+#
+# Avvio:   cp .env.box.example .env  &&  (compila .env)  &&  docker compose up -d --build
+# Variabili: vedi .env.box.example
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sagripanti}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Imposta POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-sagripanti}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sagripanti} -d ${POSTGRES_DB:-sagripanti}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      args:
+        NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-sagripanti}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-sagripanti}
+      DIRECT_URL: postgresql://${POSTGRES_USER:-sagripanti}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-sagripanti}
+      AUTH_TOKEN: ${AUTH_TOKEN:?Imposta AUTH_TOKEN in .env}
+      CRON_SECRET: ${CRON_SECRET:?Imposta CRON_SECRET in .env}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      NEXT_PUBLIC_TELEGRAM_BOT_USERNAME: ${NEXT_PUBLIC_TELEGRAM_BOT_USERNAME:-}
+      NODE_ENV: production
+    expose:
+      - "3000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Dominio e email per Let's Encrypt (usati nel Caddyfile).
+      SITE_DOMAIN: ${SITE_DOMAIN:-box.sagripanti.uk}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@sagripanti.uk}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # Replica del Vercel Cron: chiama /api/cron/bots ogni giorno alle 22:00 (UTC, come su Vercel).
+  cron:
+    image: alpine:3.20
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      CRON_SECRET: ${CRON_SECRET}
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache curl >/dev/null
+        printf '0 22 * * * curl -fsS -H "Authorization: Bearer %s" http://app:3000/api/cron/bots >/proc/1/fd/1 2>&1\n' "$$CRON_SECRET" > /etc/crontabs/root
+        echo "[cron] crontab installato; avvio crond"
+        crond -f -l 8
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

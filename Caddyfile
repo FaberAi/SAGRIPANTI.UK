@@ -1,0 +1,11 @@
+# Caddy: reverse proxy con HTTPS automatico (Let's Encrypt) per box.sagripanti.uk
+# Il dominio e l'email arrivano dalle variabili definite nel docker-compose.
+
+{
+	email {$ACME_EMAIL}
+}
+
+{$SITE_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy app:3000
+}

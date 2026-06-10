@@ -378,9 +378,9 @@ const TAPPE: { anno: string; titolo: string; testo: string }[] = [
 
 /* ---------- palette vetrina — bianco sporco ---------- */
 const BG = "#eef3f7";        // celestino chiarissimo — prova
-const INK = "#1b1d21";       // testo primario, quasi-nero caldo
-const INK_SOFT = "#565a61";  // testo secondario
-const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
+const INK = "#1f2b36";       // testo primario — blu-acciaio scuro (prova)
+const INK_SOFT = "#4f6473";  // testo secondario — blu-acciaio medio
+const INK_FAINT = "#8499a6"; // testo terziario / occhielli — blu-acciaio tenue
 const HAIR = "#e4dfd4";      // linee e bordi
 
 /* palette terminale (dark) — coerente col Trading Terminal interno */
@@ -998,7 +998,7 @@ export default function LandingPage() {
               style={{
                 marginTop: 58,
                 fontSize: "clamp(15px, 2.2vw, 22px)",
-                color: "#3c3f44",
+                color: "#2b3a45",
                 fontWeight: 500,
               }}
             >
@@ -1081,7 +1081,7 @@ export default function LandingPage() {
               position: "absolute",
               bottom: 28,
               fontSize: 20,
-              color: "#bdbfc3",
+              color: "#8499a6",
               zIndex: 1,
             }}
           >
@@ -1113,7 +1113,7 @@ export default function LandingPage() {
                 fontSize: "clamp(20px, 3vw, 32px)",
                 lineHeight: 1.5,
                 fontWeight: 500,
-                color: "#3c3f44",
+                color: "#2b3a45",
               }}
             >
               Il Gruppo Sagripanti riunisce imprese che costruiscono, pubblicano e

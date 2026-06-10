@@ -381,7 +381,11 @@ const BG = "#eef3f7";        // celestino chiarissimo — prova
 const INK = "#1f2b36";       // testo primario — blu-acciaio scuro (prova)
 const INK_SOFT = "#4f6473";  // testo secondario — blu-acciaio medio
 const INK_FAINT = "#8499a6"; // testo terziario / occhielli — blu-acciaio tenue
-const HAIR = "#e4dfd4";      // linee e bordi
+const HAIR = "#dbe3ec";      // linee e bordi — grigio-azzurro freddo
+
+/* famiglie tipografiche (inline, coerenti con next/font in layout.tsx) */
+const SERIF = "var(--font-serif), Georgia, 'Times New Roman', serif"; // display editoriale
+const MONO = "'JetBrains Mono', 'SF Mono', ui-monospace, monospace";   // solo terminale
 
 /* palette terminale (dark) — coerente col Trading Terminal interno */
 const TERM_BG = "#0a0e17";
@@ -447,7 +451,7 @@ function CircuitBg() {
             height="160"
             patternUnits="userSpaceOnUse"
           >
-            <g fill="none" stroke="#1b1d21" strokeWidth="1.1">
+            <g fill="none" stroke="#24323d" strokeWidth="1.1">
               <path d="M0 34 H44 V82 H104 V22 H160" />
               <path d="M24 160 V112 H80 V64 H134 V0" />
               <path d="M0 124 H34 V160" />
@@ -455,7 +459,7 @@ function CircuitBg() {
               <path d="M44 34 V0" />
               <path d="M80 64 H80 M104 22 V0" />
             </g>
-            <g fill="#1b1d21">
+            <g fill="#24323d">
               <circle cx="44" cy="82" r="3" />
               <circle cx="104" cy="22" r="3" />
               <circle cx="80" cy="64" r="3" />
@@ -546,6 +550,7 @@ function TerminalTeaser() {
                   display: "flex",
                   alignItems: "center",
                   gap: 9,
+                  fontFamily: MONO,
                   fontSize: 11,
                   letterSpacing: "0.22em",
                   color: CYAN,
@@ -628,6 +633,7 @@ function TerminalTeaser() {
                 </div>
                 <span
                   style={{
+                    fontFamily: MONO,
                     fontSize: 10,
                     letterSpacing: "0.14em",
                     color: "#5b6b8a",
@@ -685,6 +691,7 @@ function TerminalTeaser() {
                     style={{
                       flex: "1 1 0",
                       minWidth: 92,
+                      fontFamily: MONO,
                       background: TERM_BG,
                       border: `1px solid ${TERM_BORDER}`,
                       borderRadius: 6,
@@ -832,7 +839,7 @@ export default function LandingPage() {
               fontWeight: 600,
               color: scrolled ? INK : INK_SOFT,
               textDecoration: "none",
-              border: `1px solid ${scrolled ? INK : "#cdc8bb"}`,
+              border: `1px solid ${scrolled ? INK : "#c6d0db"}`,
               padding: "8px 16px",
               borderRadius: 3,
               transition: "all 0.3s ease",
@@ -890,7 +897,7 @@ export default function LandingPage() {
               height: 460,
               bottom: "-10%",
               right: "-4%",
-              background: "rgba(200,184,150,0.34)",
+              background: "rgba(122,168,206,0.32)",
               animation: "saguk-drift 30s ease-in-out infinite reverse",
             }}
           />
@@ -996,10 +1003,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: INTRO + 1.5 }}
               style={{
-                marginTop: 58,
-                fontSize: "clamp(15px, 2.2vw, 22px)",
+                marginTop: 54,
+                fontFamily: SERIF,
+                fontStyle: "italic",
+                fontSize: "clamp(20px, 2.8vw, 30px)",
                 color: "#2b3a45",
-                fontWeight: 500,
+                fontWeight: 400,
+                letterSpacing: "0.005em",
               }}
             >
               Un gruppo. Molte direzioni.
@@ -1054,7 +1064,7 @@ export default function LandingPage() {
                   href="/login"
                   style={{
                     display: "inline-block",
-                    border: "1px solid #cdc8bb",
+                    border: "1px solid #c6d0db",
                     color: INK_SOFT,
                     fontWeight: 700,
                     fontSize: 12,
@@ -1110,9 +1120,11 @@ export default function LandingPage() {
             </div>
             <p
               style={{
-                fontSize: "clamp(20px, 3vw, 32px)",
+                fontFamily: SERIF,
+                fontSize: "clamp(22px, 3.1vw, 34px)",
                 lineHeight: 1.5,
-                fontWeight: 500,
+                fontWeight: 400,
+                letterSpacing: "0.003em",
                 color: "#2b3a45",
               }}
             >
@@ -1143,8 +1155,10 @@ export default function LandingPage() {
             >
               <h2
                 style={{
-                  fontSize: "clamp(26px, 4vw, 44px)",
-                  fontWeight: 800,
+                  fontFamily: SERIF,
+                  fontSize: "clamp(28px, 4.2vw, 48px)",
+                  fontWeight: 600,
+                  letterSpacing: "0.002em",
                   margin: 0,
                   color: INK,
                 }}
@@ -1216,7 +1230,7 @@ export default function LandingPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#b0aa9c",
+                      color: "#8fa3b2",
                       fontSize: 11,
                       letterSpacing: "0.16em",
                       textAlign: "center",
@@ -1242,8 +1256,10 @@ export default function LandingPage() {
                 </div>
                 <h2
                   style={{
-                    fontSize: "clamp(26px, 3.6vw, 40px)",
-                    fontWeight: 800,
+                    fontFamily: SERIF,
+                    fontSize: "clamp(28px, 3.8vw, 44px)",
+                    fontWeight: 600,
+                    letterSpacing: "0.002em",
                     margin: 0,
                     color: INK,
                   }}
@@ -1263,9 +1279,10 @@ export default function LandingPage() {
                 </div>
                 <p
                   style={{
+                    fontFamily: SERIF,
                     color: INK_SOFT,
-                    fontSize: 16,
-                    lineHeight: 1.75,
+                    fontSize: 18,
+                    lineHeight: 1.72,
                     marginTop: 22,
                   }}
                 >
@@ -1313,7 +1330,7 @@ export default function LandingPage() {
                   top: 0,
                   bottom: 0,
                   width: 1,
-                  background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                  background: "linear-gradient(180deg,#2a3a45,#8499a6)",
                   transformOrigin: "top",
                   scaleY: lineScale,
                 }}
@@ -1356,7 +1373,7 @@ export default function LandingPage() {
                           width: 9,
                           height: 9,
                           borderRadius: "50%",
-                          background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                          background: "linear-gradient(180deg,#2a3a45,#8499a6)",
                           zIndex: 2,
                         }}
                       />

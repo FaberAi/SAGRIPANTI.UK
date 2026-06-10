@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifySession, SESSION_COOKIE } from "@/lib/session";
 
 // Rotte riservate: accessibili solo dopo il login.
-const PROTECTED = ["/terminal", "/portfolio", "/bots", "/chart", "/admin"];
+const PROTECTED = ["/terminal", "/portfolio", "/bots", "/chart", "/admin", "/cockpit"];
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -40,6 +40,7 @@ export const config = {
     "/bots/:path*",
     "/chart/:path*",
     "/admin/:path*",
+    "/cockpit/:path*",
     "/api/:path*",
   ],
 };

@@ -235,7 +235,7 @@ export default function IntroSplash() {
             ctx.font = "600 13px 'JetBrains Mono',monospace";
             ctx.textAlign = "center";
             ctx.fillStyle = "#6f7378";
-            ctx.fillText("I L   F U T U R O", cx, cy + fs * 0.62);
+            ctx.fillText("T H E   F U T U R E", cx, cy + fs * 0.62);
             ctx.restore();
           }
         }

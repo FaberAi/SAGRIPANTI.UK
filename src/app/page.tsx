@@ -377,7 +377,7 @@ const TAPPE: { anno: string; titolo: string; testo: string }[] = [
 ];
 
 /* ---------- palette vetrina — bianco sporco ---------- */
-const BG = "#f5f4f1";        // bianco sporco — neutro, non beige
+const BG = "#eef3f7";        // celestino chiarissimo — prova
 const INK = "#1b1d21";       // testo primario, quasi-nero caldo
 const INK_SOFT = "#565a61";  // testo secondario
 const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
@@ -815,7 +815,7 @@ export default function LandingPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: scrolled ? "12px 28px" : "20px 28px",
-            background: scrolled ? "rgba(244,241,234,0.85)" : "transparent",
+            background: scrolled ? "rgba(238,243,247,0.85)" : "transparent",
             backdropFilter: scrolled ? "blur(12px)" : "none",
             borderBottom: scrolled ? `1px solid ${HAIR}` : "1px solid transparent",
             transition: "all 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)",
@@ -1189,7 +1189,7 @@ export default function LandingPage() {
                   borderRadius: 8,
                   overflow: "hidden",
                   border: `1px solid ${HAIR}`,
-                  background: "linear-gradient(160deg,#ebeae6,#f5f4f1)",
+                  background: "linear-gradient(160deg,#e3ebf2,#eef3f7)",
                   perspective: "1000px",
                   transformStyle: "preserve-3d",
                 }}

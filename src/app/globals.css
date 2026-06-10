@@ -219,9 +219,10 @@ tr:hover td { background: rgba(0,212,255,0.03); }
 /* ---- Variante chiara: la vetrina vive su bianco sporco (il terminale
    resta dark). Acciaio brunito che legge su avorio, card e link scuri. ---- */
 .metal-ink {
+  /* PROVA celestino: gradiente azzurro chiaro metallico (era acciaio brunito) */
   background: linear-gradient(176deg,
-    #6b7178 0%, #2a2d31 24%, #585d63 42%,
-    #16181b 56%, #4a4e54 72%, #1f2225 100%);
+    #8fc7ec 0%, #2e7fb0 24%, #6fb0da 42%,
+    #1d5e8a 56%, #5aa3cf 72%, #235f87 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

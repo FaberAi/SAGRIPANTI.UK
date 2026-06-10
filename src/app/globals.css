@@ -451,3 +451,22 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   .saguk-blob { animation: none !important; will-change: auto; }
   .saguk-circuit { animation: none !important; opacity: 0.085; }
 }
+
+/* ============ Accessibilità & rifiniture globali ============ */
+html { scroll-behavior: smooth; }
+
+/* Focus visibile elegante, coerente con l'acciaio (solo da tastiera). */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2a3a45;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .grain-overlay { animation: none !important; }
+  .saguk-live-dot { animation: none !important; }
+  * { scroll-behavior: auto !important; }
+}

@@ -22,10 +22,45 @@ const fraunces = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Gruppo Sagripanti",
+  metadataBase: new URL("https://sagripanti.uk"),
+  title: {
+    default: "Gruppo Sagripanti — Un gruppo. Molte direzioni.",
+    template: "%s · Gruppo Sagripanti",
+  },
   description:
     "Gruppo Sagripanti — tecnologia, editoria, ospitalità e servizi. La casa di FaberAi, Love Me, delle testate e di PolizzaDoc.",
   applicationName: "Gruppo Sagripanti",
+  keywords: [
+    "Gruppo Sagripanti",
+    "Fabrizio Sagripanti",
+    "FaberAi",
+    "PolizzaDoc",
+    "Love Me",
+    "Everylife",
+    "tecnologia",
+    "editoria",
+    "ospitalità",
+    "Bracciano",
+  ],
+  authors: [{ name: "Fabrizio Sagripanti" }],
+  creator: "Fabrizio Sagripanti",
+  publisher: "Trade Consulting Italia S.r.l.s.",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "it_IT",
+    url: "https://sagripanti.uk",
+    siteName: "Gruppo Sagripanti",
+    title: "Gruppo Sagripanti — Un gruppo. Molte direzioni.",
+    description:
+      "Tecnologia, editoria, ospitalità e servizi sotto un solo tetto. Un solo modo di lavorare: fare le cose come si deve.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Gruppo Sagripanti — Un gruppo. Molte direzioni.",
+    description:
+      "Tecnologia, editoria, ospitalità e servizi sotto un solo tetto.",
+  },
   appleWebApp: {
     capable: true,
     title: "Sagripanti",

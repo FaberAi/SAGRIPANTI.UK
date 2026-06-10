@@ -97,6 +97,49 @@ function CountUp({
   return <span ref={ref}>{Math.round(val)}</span>;
 }
 
+/* ---------- occhiello editoriale: filetto + label tracciata ---------- */
+function Eyebrow({
+  children,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  align?: "left" | "center";
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: align === "center" ? "center" : "flex-start",
+        gap: 13,
+        marginBottom: 26,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{ width: 30, height: 1, background: "#8499a6", opacity: 0.55 }}
+      />
+      <span
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.3em",
+          color: "#8499a6",
+          fontWeight: 600,
+          textTransform: "uppercase",
+        }}
+      >
+        {children}
+      </span>
+      {align === "center" && (
+        <span
+          aria-hidden
+          style={{ width: 30, height: 1, background: "#8499a6", opacity: 0.55 }}
+        />
+      )}
+    </div>
+  );
+}
+
 /* ---------- nastro scorrevole dei marchi del Gruppo ---------- */
 const MARQUEE = [
   "FaberAi",
@@ -232,15 +275,17 @@ function DivisionCard({ d, i }: { d: Division; i: number }) {
           </div>
           <div
             style={{
-              fontSize: 24,
-              fontWeight: 800,
+              fontFamily: SERIF,
+              fontSize: 26,
+              fontWeight: 600,
+              letterSpacing: "0.005em",
               color: INK,
-              marginBottom: 10,
+              marginBottom: 11,
             }}
           >
             {d.name}
           </div>
-          <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6 }}>
+          <p style={{ color: INK_SOFT, fontSize: 13.5, lineHeight: 1.65 }}>
             {d.desc}
           </p>
           {d.href && (
@@ -833,6 +878,7 @@ export default function LandingPage() {
           </span>
           <Link
             href="/login"
+            className="saguk-cta saguk-cta-ghost"
             style={{
               fontSize: 11,
               letterSpacing: "0.14em",
@@ -842,7 +888,6 @@ export default function LandingPage() {
               border: `1px solid ${scrolled ? INK : "#c6d0db"}`,
               padding: "8px 16px",
               borderRadius: 3,
-              transition: "all 0.3s ease",
             }}
           >
             ACCEDI AL TERMINALE →
@@ -1044,6 +1089,7 @@ export default function LandingPage() {
               <Magnetic>
                 <a
                   href="#divisioni"
+                  className="saguk-cta saguk-cta-primary"
                   style={{
                     display: "inline-block",
                     background: INK,
@@ -1051,7 +1097,7 @@ export default function LandingPage() {
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: "0.1em",
-                    padding: "13px 26px",
+                    padding: "14px 28px",
                     borderRadius: 3,
                     textDecoration: "none",
                   }}
@@ -1062,6 +1108,7 @@ export default function LandingPage() {
               <Magnetic>
                 <Link
                   href="/login"
+                  className="saguk-cta saguk-cta-ghost"
                   style={{
                     display: "inline-block",
                     border: "1px solid #c6d0db",
@@ -1069,7 +1116,7 @@ export default function LandingPage() {
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: "0.1em",
-                    padding: "13px 26px",
+                    padding: "14px 28px",
                     borderRadius: 3,
                     textDecoration: "none",
                   }}
@@ -1106,32 +1153,25 @@ export default function LandingPage() {
         <StatsBand />
 
         {/* MANIFESTO */}
-        <section style={{ padding: "100px 24px", maxWidth: 880, margin: "0 auto" }}>
-          <Reveal>
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: "0.3em",
-                color: INK_FAINT,
-                marginBottom: 28,
-              }}
-            >
-              IL GRUPPO
-            </div>
+        <section style={{ padding: "118px 24px", maxWidth: 920, margin: "0 auto" }}>
+          <Reveal style={{ textAlign: "center" }}>
+            <Eyebrow align="center">Il Gruppo</Eyebrow>
             <p
               style={{
                 fontFamily: SERIF,
-                fontSize: "clamp(22px, 3.1vw, 34px)",
-                lineHeight: 1.5,
+                fontSize: "clamp(23px, 3.3vw, 37px)",
+                lineHeight: 1.46,
                 fontWeight: 400,
                 letterSpacing: "0.003em",
                 color: "#2b3a45",
+                maxWidth: 820,
+                margin: "0 auto",
               }}
             >
               Il Gruppo Sagripanti riunisce imprese che costruiscono, pubblicano e
               accolgono. Realtà diverse — software, magazine, caffè, servizi
               assicurativi — tenute insieme da{" "}
-              <span className="metal-ink" style={{ fontWeight: 800 }}>
+              <span className="metal-ink" style={{ fontWeight: 600 }}>
                 un solo modo di lavorare
               </span>
               : cura, ambizione, e zero scorciatoie.
@@ -1144,31 +1184,22 @@ export default function LandingPage() {
           id="divisioni"
           style={{ padding: "40px 24px 110px", maxWidth: 1140, margin: "0 auto" }}
         >
-          <Reveal>
-            <div
+          <Reveal style={{ marginBottom: 50 }}>
+            <Eyebrow>Le Divisioni</Eyebrow>
+            <h2
               style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 16,
-                marginBottom: 44,
+                fontFamily: SERIF,
+                fontSize: "clamp(30px, 4.4vw, 52px)",
+                fontWeight: 600,
+                letterSpacing: "0.002em",
+                lineHeight: 1.08,
+                margin: 0,
+                maxWidth: 640,
+                color: INK,
               }}
             >
-              <h2
-                style={{
-                  fontFamily: SERIF,
-                  fontSize: "clamp(28px, 4.2vw, 48px)",
-                  fontWeight: 600,
-                  letterSpacing: "0.002em",
-                  margin: 0,
-                  color: INK,
-                }}
-              >
-                Le divisioni
-              </h2>
-              <span style={{ color: INK_FAINT, fontSize: 13 }}>
-                — quattro anime, una sola visione
-              </span>
-            </div>
+              Quattro anime, una sola visione.
+            </h2>
           </Reveal>
           <div
             style={{
@@ -1244,16 +1275,7 @@ export default function LandingPage() {
                 )}
               </motion.div>
               <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: "0.3em",
-                    color: INK_FAINT,
-                    marginBottom: 18,
-                  }}
-                >
-                  IL FONDATORE
-                </div>
+                <Eyebrow>Il Fondatore</Eyebrow>
                 <h2
                   style={{
                     fontFamily: SERIF,
@@ -1298,16 +1320,7 @@ export default function LandingPage() {
           {/* il percorso — timeline */}
           <div style={{ maxWidth: 760, marginTop: 64, position: "relative" }}>
             <Reveal>
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.3em",
-                  color: INK_FAINT,
-                  marginBottom: 32,
-                }}
-              >
-                IL PERCORSO
-              </div>
+              <Eyebrow>Il Percorso</Eyebrow>
             </Reveal>
 
             <div ref={timelineRef} style={{ position: "relative" }}>
@@ -1412,15 +1425,7 @@ export default function LandingPage() {
                 gap: 22,
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.3em",
-                  color: INK_FAINT,
-                }}
-              >
-                IL METODO
-              </div>
+              <Eyebrow>Il Metodo</Eyebrow>
               <p style={{ color: INK_SOFT, fontSize: 16, lineHeight: 1.8 }}>
                 Il mio mestiere non è scrivere il codice riga per riga: è
                 decidere <em>cosa</em> costruire e <em>perché</em>, dirigere

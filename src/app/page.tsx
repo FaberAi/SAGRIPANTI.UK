@@ -175,17 +175,18 @@ function Marquee() {
             style={{ display: "inline-flex", alignItems: "center" }}
           >
             <span
-              className="wordmark"
               style={{
-                fontSize: 17,
-                letterSpacing: "0.1em",
-                color: INK,
+                fontSize: 14,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                fontWeight: 600,
+                color: INK_SOFT,
                 padding: "0 30px",
               }}
             >
               {t}
             </span>
-            <span style={{ color: INK_FAINT, fontSize: 9 }}>◆</span>
+            <span style={{ color: "#b9c8d8", fontSize: 7 }}>●</span>
           </span>
         ))}
       </motion.div>
@@ -1064,11 +1065,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: INTRO + 1.65 }}
               style={{
-                marginTop: 10,
-                fontSize: 13,
-                letterSpacing: "0.06em",
-                color: INK_FAINT,
+                marginTop: 16,
+                fontSize: 14.5,
+                letterSpacing: "0.02em",
+                lineHeight: 1.7,
+                color: INK_SOFT,
                 maxWidth: 540,
+                textAlign: "center",
               }}
             >
               Tecnologia, editoria, ospitalità e servizi — costruiti con un solo

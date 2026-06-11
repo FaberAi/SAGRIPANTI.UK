@@ -23,9 +23,24 @@
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 13px;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern", "liga", "calt";
+}
+
+/* serif editoriale — titoli display e prosa di pregio */
+.serif {
+  font-family: var(--font-serif), Georgia, 'Times New Roman', serif;
+  font-optical-sizing: auto;
+}
+
+/* monospace tecnico — riservato al Trading Terminal (è un terminale) */
+.mono {
+  font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
 }
 
 /* Scrollbar */
@@ -219,9 +234,10 @@ tr:hover td { background: rgba(0,212,255,0.03); }
 /* ---- Variante chiara: la vetrina vive su bianco sporco (il terminale
    resta dark). Acciaio brunito che legge su avorio, card e link scuri. ---- */
 .metal-ink {
+  /* PROVA celeste acciaio: acciaio con cast azzurro (era acciaio brunito) */
   background: linear-gradient(176deg,
-    #6b7178 0%, #2a2d31 24%, #585d63 42%,
-    #16181b 56%, #4a4e54 72%, #1f2225 100%);
+    #b3ccdb 0%, #51697a 22%, #dceaf2 41%,
+    #3b5260 56%, #88a2b4 72%, #2a3a45 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -230,24 +246,24 @@ tr:hover td { background: rgba(0,212,255,0.03); }
 
 .div-card-light {
   background: #ffffff;
-  border: 1px solid #e4dfd4;
+  border: 1px solid #dbe3ec;
   border-radius: 6px;
   padding: 28px 26px;
   transition: transform 0.35s cubic-bezier(0.2,0.7,0.2,1), border-color 0.35s, box-shadow 0.35s;
 }
 .div-card-light:hover {
   transform: translateY(-6px);
-  border-color: #c9c3b4;
-  box-shadow: 0 20px 44px -24px rgba(40,35,25,0.42);
+  border-color: #b9c8d8;
+  box-shadow: 0 20px 44px -24px rgba(31,43,54,0.40);
 }
 
 .saguk-link-ink {
-  color: #1b1d21;
+  color: #1f2b36;
   text-decoration: none;
-  border-bottom: 1px solid #cdc8bb;
+  border-bottom: 1px solid #c6d0db;
   transition: border-color 0.2s;
 }
-.saguk-link-ink:hover { border-color: #1b1d21; }
+.saguk-link-ink:hover { border-color: #1f2b36; }
 
 /* Sezione fondatore: due colonne su desktop, impilate su mobile
    (così il testo non resta schiacciato accanto alla foto). */
@@ -269,6 +285,22 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   }
 }
 
+/* CTA della vetrina: lift morbido + ombra all'hover (eleganza, non rumore) */
+.saguk-cta {
+  transition: transform 0.3s cubic-bezier(0.2,0.7,0.2,1), box-shadow 0.3s ease,
+    background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.saguk-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -14px rgba(31,43,54,0.55);
+}
+.saguk-cta-ghost:hover {
+  transform: translateY(-2px);
+  border-color: #1f2b36 !important;
+  color: #1f2b36 !important;
+  box-shadow: 0 14px 28px -16px rgba(31,43,54,0.35);
+}
+
 /* Texture granulare ultramoderna */
 .grain-overlay {
   position: fixed;
@@ -278,12 +310,14 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   bottom: -50%;
   width: 200%;
   height: 200%;
-  background: transparent url('https://assets.iceable.com/img/noise-transparent.png') repeat 0 0;
+  /* noise SVG inline (feTurbulence) — self-contained, niente richiesta esterna */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
   animation: grain 8s steps(10) infinite;
-  opacity: 0.04;
+  opacity: 0.035;
   pointer-events: none;
   z-index: 9998;
+  mix-blend-mode: multiply;
 }
 
 @keyframes grain {
@@ -347,18 +381,18 @@ tr:hover td { background: rgba(0,212,255,0.03); }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1px;
-  background: #e4dfd4; /* la "hairline" diventa lo sfondo tra le celle */
-  border: 1px solid #e4dfd4;
+  background: #dbe3ec; /* la "hairline" diventa lo sfondo tra le celle */
+  border: 1px solid #dbe3ec;
   border-radius: 10px;
   overflow: hidden;
 }
 .saguk-stat {
-  background: #f5f4f1;
+  background: #eef3f7;
   padding: 34px 22px;
   text-align: center;
   transition: background 0.4s ease;
 }
-.saguk-stat:hover { background: #fbfaf7; }
+.saguk-stat:hover { background: #f7fafc; }
 @media (max-width: 720px) {
   .saguk-stats { grid-template-columns: repeat(2, 1fr); }
 }
@@ -417,4 +451,23 @@ tr:hover td { background: rgba(0,212,255,0.03); }
 @media (max-width: 767px) {
   .saguk-blob { animation: none !important; will-change: auto; }
   .saguk-circuit { animation: none !important; opacity: 0.085; }
+}
+
+/* ============ Accessibilità & rifiniture globali ============ */
+html { scroll-behavior: smooth; }
+
+/* Focus visibile elegante, coerente con l'acciaio (solo da tastiera). */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #2a3a45;
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .grain-overlay { animation: none !important; }
+  .saguk-live-dot { animation: none !important; }
+  * { scroll-behavior: auto !important; }
 }

@@ -15,7 +15,7 @@ interface Particle {
   delay: number;
 }
 
-const BG = "#f5f4f1"; // bianco sporco — coerente con la vetrina
+const BG = "#eef3f7"; // celestino chiarissimo — coerente con la vetrina
 
 const CHARS = "アイウエオカキクケコサシスセソタチツテトナニヌネ0123456789ﾊﾋﾌﾍﾎ<>=/{}*+#$".split("");
 const pick = () => CHARS[(Math.random() * CHARS.length) | 0];
@@ -125,14 +125,14 @@ export default function IntroSplash() {
         ctx.font = fontOf(fs);
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        // acciaio brunito: legge su bianco sporco, alternanza chiaro/scuro
+        // celeste acciaio: acciaio con cast azzurro, legge su bianco sporco
         const g = ctx.createLinearGradient(0, cy - fs / 2, 0, cy + fs / 2);
-        g.addColorStop(0.0, "#6b7178");
-        g.addColorStop(0.22, "#2a2d31");
-        g.addColorStop(0.42, "#585d63");
-        g.addColorStop(0.56, "#16181b");
-        g.addColorStop(0.72, "#4a4e54");
-        g.addColorStop(1.0, "#1f2225");
+        g.addColorStop(0.0, "#b3ccdb");
+        g.addColorStop(0.22, "#51697a");
+        g.addColorStop(0.42, "#dceaf2");
+        g.addColorStop(0.56, "#3b5260");
+        g.addColorStop(0.72, "#88a2b4");
+        g.addColorStop(1.0, "#2a3a45");
         ctx.shadowColor = "rgba(35,30,20,0.32)";
         ctx.shadowBlur = 14;
         ctx.shadowOffsetY = 5;
@@ -175,7 +175,7 @@ export default function IntroSplash() {
 
         if (t < steelStart) {
           // trail fade: velo di bianco sporco semi-trasparente
-          ctx.fillStyle = "rgba(244,241,234,0.18)";
+          ctx.fillStyle = "rgba(238,243,247,0.18)";
           ctx.fillRect(0, 0, W, H);
           const rainA = t < T_RAIN ? 1 : Math.max(0, 1 - (t - T_RAIN) / T_FORM);
           ctx.font = "16px 'JetBrains Mono',monospace";
@@ -183,14 +183,14 @@ export default function IntroSplash() {
             const x = i * cell;
             const y = drops[i];
             // testa della goccia: quasi-nero netto
-            ctx.fillStyle = `rgba(18,18,20,${0.92 * rainA})`;
+            ctx.fillStyle = `rgba(24,34,44,${0.92 * rainA})`;
             ctx.fillText(pick(), x, y);
             // scia: grigio medio che sfuma. Anche su mobile teniamo due
             // segmenti (prima solo uno) per una pioggia più ricca e leggibile;
             // l'aumento di costo è contenuto grazie a 30fps + cell più ampia.
-            ctx.fillStyle = `rgba(70,72,78,${0.5 * rainA})`;
+            ctx.fillStyle = `rgba(68,84,96,${0.5 * rainA})`;
             ctx.fillText(pick(), x, y - cell);
-            ctx.fillStyle = `rgba(96,99,105,${0.28 * rainA})`;
+            ctx.fillStyle = `rgba(104,122,134,${0.28 * rainA})`;
             ctx.fillText(pick(), x, y - cell * 2);
             drops[i] = y > H + Math.random() * 240 ? Math.random() * -120 : y + cell;
           }
@@ -217,7 +217,7 @@ export default function IntroSplash() {
             const set = local >= 1;
             const a = (set ? 1 : 0.45 + 0.55 * local) * (1 - steelA);
             // glifo a posto = nero pieno; ancora in volo = grigio scuro
-            ctx.fillStyle = set ? `rgba(18,19,22,${a})` : `rgba(58,61,66,${a})`;
+            ctx.fillStyle = set ? `rgba(24,34,44,${a})` : `rgba(68,84,96,${a})`;
             // Il nome si forma coi glifi Matrix anche su mobile (non più puntini).
             // Sostenibile grazie a 30fps + dpr 1.5 + gap particelle calibrato.
             if (flip && local < 1) p.char = pick();
@@ -234,8 +234,8 @@ export default function IntroSplash() {
             ctx.globalAlpha = subA;
             ctx.font = "600 13px 'JetBrains Mono',monospace";
             ctx.textAlign = "center";
-            ctx.fillStyle = "#6f7378";
-            ctx.fillText("I L   F U T U R O", cx, cy + fs * 0.62);
+            ctx.fillStyle = "#7e95a3";
+            ctx.fillText("T H E   F U T U R E", cx, cy + fs * 0.62);
             ctx.restore();
           }
         }

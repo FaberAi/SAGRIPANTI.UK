@@ -97,6 +97,49 @@ function CountUp({
   return <span ref={ref}>{Math.round(val)}</span>;
 }
 
+/* ---------- occhiello editoriale: filetto + label tracciata ---------- */
+function Eyebrow({
+  children,
+  align = "left",
+}: {
+  children: React.ReactNode;
+  align?: "left" | "center";
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: align === "center" ? "center" : "flex-start",
+        gap: 13,
+        marginBottom: 26,
+      }}
+    >
+      <span
+        aria-hidden
+        style={{ width: 30, height: 1, background: "#8499a6", opacity: 0.55 }}
+      />
+      <span
+        style={{
+          fontSize: 11,
+          letterSpacing: "0.3em",
+          color: "#8499a6",
+          fontWeight: 600,
+          textTransform: "uppercase",
+        }}
+      >
+        {children}
+      </span>
+      {align === "center" && (
+        <span
+          aria-hidden
+          style={{ width: 30, height: 1, background: "#8499a6", opacity: 0.55 }}
+        />
+      )}
+    </div>
+  );
+}
+
 /* ---------- nastro scorrevole dei marchi del Gruppo ---------- */
 const MARQUEE = [
   "FaberAi",
@@ -132,17 +175,18 @@ function Marquee() {
             style={{ display: "inline-flex", alignItems: "center" }}
           >
             <span
-              className="wordmark"
               style={{
-                fontSize: 17,
-                letterSpacing: "0.1em",
-                color: INK,
+                fontSize: 14,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                fontWeight: 600,
+                color: INK_SOFT,
                 padding: "0 30px",
               }}
             >
               {t}
             </span>
-            <span style={{ color: INK_FAINT, fontSize: 9 }}>◆</span>
+            <span style={{ color: "#b9c8d8", fontSize: 7 }}>●</span>
           </span>
         ))}
       </motion.div>
@@ -232,15 +276,17 @@ function DivisionCard({ d, i }: { d: Division; i: number }) {
           </div>
           <div
             style={{
-              fontSize: 24,
-              fontWeight: 800,
+              fontFamily: SERIF,
+              fontSize: 26,
+              fontWeight: 600,
+              letterSpacing: "0.005em",
               color: INK,
-              marginBottom: 10,
+              marginBottom: 11,
             }}
           >
             {d.name}
           </div>
-          <p style={{ color: INK_SOFT, fontSize: 13, lineHeight: 1.6 }}>
+          <p style={{ color: INK_SOFT, fontSize: 13.5, lineHeight: 1.65 }}>
             {d.desc}
           </p>
           {d.href && (
@@ -377,11 +423,15 @@ const TAPPE: { anno: string; titolo: string; testo: string }[] = [
 ];
 
 /* ---------- palette vetrina — bianco sporco ---------- */
-const BG = "#f5f4f1";        // bianco sporco — neutro, non beige
-const INK = "#1b1d21";       // testo primario, quasi-nero caldo
-const INK_SOFT = "#565a61";  // testo secondario
-const INK_FAINT = "#8b8f96"; // testo terziario / occhielli
-const HAIR = "#e4dfd4";      // linee e bordi
+const BG = "#eef3f7";        // celestino chiarissimo — prova
+const INK = "#1f2b36";       // testo primario — blu-acciaio scuro (prova)
+const INK_SOFT = "#4f6473";  // testo secondario — blu-acciaio medio
+const INK_FAINT = "#8499a6"; // testo terziario / occhielli — blu-acciaio tenue
+const HAIR = "#dbe3ec";      // linee e bordi — grigio-azzurro freddo
+
+/* famiglie tipografiche (inline, coerenti con next/font in layout.tsx) */
+const SERIF = "var(--font-serif), Georgia, 'Times New Roman', serif"; // display editoriale
+const MONO = "'JetBrains Mono', 'SF Mono', ui-monospace, monospace";   // solo terminale
 
 /* palette terminale (dark) — coerente col Trading Terminal interno */
 const TERM_BG = "#0a0e17";
@@ -447,7 +497,7 @@ function CircuitBg() {
             height="160"
             patternUnits="userSpaceOnUse"
           >
-            <g fill="none" stroke="#1b1d21" strokeWidth="1.1">
+            <g fill="none" stroke="#24323d" strokeWidth="1.1">
               <path d="M0 34 H44 V82 H104 V22 H160" />
               <path d="M24 160 V112 H80 V64 H134 V0" />
               <path d="M0 124 H34 V160" />
@@ -455,7 +505,7 @@ function CircuitBg() {
               <path d="M44 34 V0" />
               <path d="M80 64 H80 M104 22 V0" />
             </g>
-            <g fill="#1b1d21">
+            <g fill="#24323d">
               <circle cx="44" cy="82" r="3" />
               <circle cx="104" cy="22" r="3" />
               <circle cx="80" cy="64" r="3" />
@@ -546,6 +596,7 @@ function TerminalTeaser() {
                   display: "flex",
                   alignItems: "center",
                   gap: 9,
+                  fontFamily: MONO,
                   fontSize: 11,
                   letterSpacing: "0.22em",
                   color: CYAN,
@@ -628,6 +679,7 @@ function TerminalTeaser() {
                 </div>
                 <span
                   style={{
+                    fontFamily: MONO,
                     fontSize: 10,
                     letterSpacing: "0.14em",
                     color: "#5b6b8a",
@@ -685,6 +737,7 @@ function TerminalTeaser() {
                     style={{
                       flex: "1 1 0",
                       minWidth: 92,
+                      fontFamily: MONO,
                       background: TERM_BG,
                       border: `1px solid ${TERM_BORDER}`,
                       borderRadius: 6,
@@ -815,7 +868,7 @@ export default function LandingPage() {
             alignItems: "center",
             justifyContent: "space-between",
             padding: scrolled ? "12px 28px" : "20px 28px",
-            background: scrolled ? "rgba(244,241,234,0.85)" : "transparent",
+            background: scrolled ? "rgba(238,243,247,0.85)" : "transparent",
             backdropFilter: scrolled ? "blur(12px)" : "none",
             borderBottom: scrolled ? `1px solid ${HAIR}` : "1px solid transparent",
             transition: "all 0.4s cubic-bezier(0.2, 0.7, 0.2, 1)",
@@ -826,16 +879,16 @@ export default function LandingPage() {
           </span>
           <Link
             href="/login"
+            className="saguk-cta saguk-cta-ghost"
             style={{
               fontSize: 11,
               letterSpacing: "0.14em",
               fontWeight: 600,
               color: scrolled ? INK : INK_SOFT,
               textDecoration: "none",
-              border: `1px solid ${scrolled ? INK : "#cdc8bb"}`,
+              border: `1px solid ${scrolled ? INK : "#c6d0db"}`,
               padding: "8px 16px",
               borderRadius: 3,
-              transition: "all 0.3s ease",
             }}
           >
             ACCEDI AL TERMINALE →
@@ -890,7 +943,7 @@ export default function LandingPage() {
               height: 460,
               bottom: "-10%",
               right: "-4%",
-              background: "rgba(200,184,150,0.34)",
+              background: "rgba(122,168,206,0.32)",
               animation: "saguk-drift 30s ease-in-out infinite reverse",
             }}
           />
@@ -996,10 +1049,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: INTRO + 1.5 }}
               style={{
-                marginTop: 58,
-                fontSize: "clamp(15px, 2.2vw, 22px)",
-                color: "#3c3f44",
-                fontWeight: 500,
+                marginTop: 54,
+                fontFamily: SERIF,
+                fontStyle: "italic",
+                fontSize: "clamp(20px, 2.8vw, 30px)",
+                color: "#2b3a45",
+                fontWeight: 400,
+                letterSpacing: "0.005em",
               }}
             >
               Un gruppo. Molte direzioni.
@@ -1009,11 +1065,13 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: INTRO + 1.65 }}
               style={{
-                marginTop: 10,
-                fontSize: 13,
-                letterSpacing: "0.06em",
-                color: INK_FAINT,
+                marginTop: 16,
+                fontSize: 14.5,
+                letterSpacing: "0.02em",
+                lineHeight: 1.7,
+                color: INK_SOFT,
                 maxWidth: 540,
+                textAlign: "center",
               }}
             >
               Tecnologia, editoria, ospitalità e servizi — costruiti con un solo
@@ -1034,6 +1092,7 @@ export default function LandingPage() {
               <Magnetic>
                 <a
                   href="#divisioni"
+                  className="saguk-cta saguk-cta-primary"
                   style={{
                     display: "inline-block",
                     background: INK,
@@ -1041,7 +1100,7 @@ export default function LandingPage() {
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: "0.1em",
-                    padding: "13px 26px",
+                    padding: "14px 28px",
                     borderRadius: 3,
                     textDecoration: "none",
                   }}
@@ -1052,14 +1111,15 @@ export default function LandingPage() {
               <Magnetic>
                 <Link
                   href="/login"
+                  className="saguk-cta saguk-cta-ghost"
                   style={{
                     display: "inline-block",
-                    border: "1px solid #cdc8bb",
+                    border: "1px solid #c6d0db",
                     color: INK_SOFT,
                     fontWeight: 700,
                     fontSize: 12,
                     letterSpacing: "0.1em",
-                    padding: "13px 26px",
+                    padding: "14px 28px",
                     borderRadius: 3,
                     textDecoration: "none",
                   }}
@@ -1081,7 +1141,7 @@ export default function LandingPage() {
               position: "absolute",
               bottom: 28,
               fontSize: 20,
-              color: "#bdbfc3",
+              color: "#8499a6",
               zIndex: 1,
             }}
           >
@@ -1096,30 +1156,25 @@ export default function LandingPage() {
         <StatsBand />
 
         {/* MANIFESTO */}
-        <section style={{ padding: "100px 24px", maxWidth: 880, margin: "0 auto" }}>
-          <Reveal>
-            <div
-              style={{
-                fontSize: 11,
-                letterSpacing: "0.3em",
-                color: INK_FAINT,
-                marginBottom: 28,
-              }}
-            >
-              IL GRUPPO
-            </div>
+        <section style={{ padding: "118px 24px", maxWidth: 920, margin: "0 auto" }}>
+          <Reveal style={{ textAlign: "center" }}>
+            <Eyebrow align="center">Il Gruppo</Eyebrow>
             <p
               style={{
-                fontSize: "clamp(20px, 3vw, 32px)",
-                lineHeight: 1.5,
-                fontWeight: 500,
-                color: "#3c3f44",
+                fontFamily: SERIF,
+                fontSize: "clamp(23px, 3.3vw, 37px)",
+                lineHeight: 1.46,
+                fontWeight: 400,
+                letterSpacing: "0.003em",
+                color: "#2b3a45",
+                maxWidth: 820,
+                margin: "0 auto",
               }}
             >
               Il Gruppo Sagripanti riunisce imprese che costruiscono, pubblicano e
               accolgono. Realtà diverse — software, magazine, caffè, servizi
               assicurativi — tenute insieme da{" "}
-              <span className="metal-ink" style={{ fontWeight: 800 }}>
+              <span className="metal-ink" style={{ fontWeight: 600 }}>
                 un solo modo di lavorare
               </span>
               : cura, ambizione, e zero scorciatoie.
@@ -1132,29 +1187,22 @@ export default function LandingPage() {
           id="divisioni"
           style={{ padding: "40px 24px 110px", maxWidth: 1140, margin: "0 auto" }}
         >
-          <Reveal>
-            <div
+          <Reveal style={{ marginBottom: 50 }}>
+            <Eyebrow>Le Divisioni</Eyebrow>
+            <h2
               style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 16,
-                marginBottom: 44,
+                fontFamily: SERIF,
+                fontSize: "clamp(30px, 4.4vw, 52px)",
+                fontWeight: 600,
+                letterSpacing: "0.002em",
+                lineHeight: 1.08,
+                margin: 0,
+                maxWidth: 640,
+                color: INK,
               }}
             >
-              <h2
-                style={{
-                  fontSize: "clamp(26px, 4vw, 44px)",
-                  fontWeight: 800,
-                  margin: 0,
-                  color: INK,
-                }}
-              >
-                Le divisioni
-              </h2>
-              <span style={{ color: INK_FAINT, fontSize: 13 }}>
-                — quattro anime, una sola visione
-              </span>
-            </div>
+              Quattro anime, una sola visione.
+            </h2>
           </Reveal>
           <div
             style={{
@@ -1189,7 +1237,7 @@ export default function LandingPage() {
                   borderRadius: 8,
                   overflow: "hidden",
                   border: `1px solid ${HAIR}`,
-                  background: "linear-gradient(160deg,#ebeae6,#f5f4f1)",
+                  background: "linear-gradient(160deg,#e3ebf2,#eef3f7)",
                   perspective: "1000px",
                   transformStyle: "preserve-3d",
                 }}
@@ -1216,7 +1264,7 @@ export default function LandingPage() {
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      color: "#b0aa9c",
+                      color: "#8fa3b2",
                       fontSize: 11,
                       letterSpacing: "0.16em",
                       textAlign: "center",
@@ -1230,20 +1278,13 @@ export default function LandingPage() {
                 )}
               </motion.div>
               <div>
-                <div
-                  style={{
-                    fontSize: 11,
-                    letterSpacing: "0.3em",
-                    color: INK_FAINT,
-                    marginBottom: 18,
-                  }}
-                >
-                  IL FONDATORE
-                </div>
+                <Eyebrow>Il Fondatore</Eyebrow>
                 <h2
                   style={{
-                    fontSize: "clamp(26px, 3.6vw, 40px)",
-                    fontWeight: 800,
+                    fontFamily: SERIF,
+                    fontSize: "clamp(28px, 3.8vw, 44px)",
+                    fontWeight: 600,
+                    letterSpacing: "0.002em",
                     margin: 0,
                     color: INK,
                   }}
@@ -1263,9 +1304,10 @@ export default function LandingPage() {
                 </div>
                 <p
                   style={{
+                    fontFamily: SERIF,
                     color: INK_SOFT,
-                    fontSize: 16,
-                    lineHeight: 1.75,
+                    fontSize: 18,
+                    lineHeight: 1.72,
                     marginTop: 22,
                   }}
                 >
@@ -1281,16 +1323,7 @@ export default function LandingPage() {
           {/* il percorso — timeline */}
           <div style={{ maxWidth: 760, marginTop: 64, position: "relative" }}>
             <Reveal>
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.3em",
-                  color: INK_FAINT,
-                  marginBottom: 32,
-                }}
-              >
-                IL PERCORSO
-              </div>
+              <Eyebrow>Il Percorso</Eyebrow>
             </Reveal>
 
             <div ref={timelineRef} style={{ position: "relative" }}>
@@ -1313,7 +1346,7 @@ export default function LandingPage() {
                   top: 0,
                   bottom: 0,
                   width: 1,
-                  background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                  background: "linear-gradient(180deg,#2a3a45,#8499a6)",
                   transformOrigin: "top",
                   scaleY: lineScale,
                 }}
@@ -1356,7 +1389,7 @@ export default function LandingPage() {
                           width: 9,
                           height: 9,
                           borderRadius: "50%",
-                          background: "linear-gradient(180deg,#3c3f44,#8b8f96)",
+                          background: "linear-gradient(180deg,#2a3a45,#8499a6)",
                           zIndex: 2,
                         }}
                       />
@@ -1395,15 +1428,7 @@ export default function LandingPage() {
                 gap: 22,
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  letterSpacing: "0.3em",
-                  color: INK_FAINT,
-                }}
-              >
-                IL METODO
-              </div>
+              <Eyebrow>Il Metodo</Eyebrow>
               <p style={{ color: INK_SOFT, fontSize: 16, lineHeight: 1.8 }}>
                 Il mio mestiere non è scrivere il codice riga per riga: è
                 decidere <em>cosa</em> costruire e <em>perché</em>, dirigere
